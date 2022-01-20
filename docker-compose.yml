@@ -1,0 +1,10 @@
+version: '2'
+
+services:
+  division:
+    container_name: AgrarHilfe
+    ports:
+      - 10123:8080
+    build:
+      context: .
+    restart: unless-stopped
