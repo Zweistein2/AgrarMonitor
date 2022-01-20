@@ -1,7 +1,7 @@
 version: '2'
 
 services:
-  division:
+  agrarhilfe:
     container_name: AgrarHilfe
     ports:
       - 10123:8080
