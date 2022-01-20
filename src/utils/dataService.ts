@@ -5,7 +5,7 @@ class DataService {
   getServerData() {
     return axios
       .get(
-        "http://23.109.254.60:8390/feed/dedicated-server-stats.xml?code=7kMAyZkz"
+        "https://proxy.potionlabs.de/http://23.109.254.60:8390/feed/dedicated-server-stats.xml?code=7kMAyZkz"
       )
       .then((response) => {
         const options = {
@@ -20,7 +20,7 @@ class DataService {
   getEconomyData() {
     return axios
       .get(
-        "http://23.109.254.60:8390/feed/dedicated-server-savegame.html?code=7kMAyZkz&file=economy"
+        "https://proxy.potionlabs.de/http://23.109.254.60:8390/feed/dedicated-server-savegame.html?code=7kMAyZkz&file=economy"
       )
       .then((response) => {
         const options = {
@@ -35,7 +35,7 @@ class DataService {
   getMetaData() {
     return axios
       .get(
-        "http://23.109.254.60:8390/feed/dedicated-server-savegame.html?code=7kMAyZkz&file=careerSavegame"
+        "https://proxy.potionlabs.de/http://23.109.254.60:8390/feed/dedicated-server-savegame.html?code=7kMAyZkz&file=careerSavegame"
       )
       .then((response) => {
         const options = {
