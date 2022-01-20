@@ -2,10 +2,12 @@ import axios from "axios";
 import { XMLParser } from "fast-xml-parser";
 
 class DataService {
-  getServerData() {
+  getServerData(url: string, serverCode: string) {
     return axios
       .get(
-        "https://proxy.potionlabs.de/http://23.109.254.60:8390/feed/dedicated-server-stats.xml?code=7kMAyZkz"
+        "https://proxy.potionlabs.de/$url/feed/dedicated-server-stats.xml?code=$serverCode"
+          .replace("$url", url)
+          .replace("$serverCode", serverCode)
       )
       .then((response) => {
         const options = {
@@ -17,10 +19,12 @@ class DataService {
         return parser.parse(response.data).Server;
       });
   }
-  getEconomyData() {
+  getEconomyData(url: string, serverCode: string) {
     return axios
       .get(
-        "https://proxy.potionlabs.de/http://23.109.254.60:8390/feed/dedicated-server-savegame.html?code=7kMAyZkz&file=economy"
+        "https://proxy.potionlabs.de/$url/feed/dedicated-server-savegame.html?code=$serverCode&file=economy"
+          .replace("$url", url)
+          .replace("$serverCode", serverCode)
       )
       .then((response) => {
         const options = {
@@ -32,10 +36,12 @@ class DataService {
         return parser.parse(response.data).economy;
       });
   }
-  getMetaData() {
+  getMetaData(url: string, serverCode: string) {
     return axios
       .get(
-        "https://proxy.potionlabs.de/http://23.109.254.60:8390/feed/dedicated-server-savegame.html?code=7kMAyZkz&file=careerSavegame"
+        "https://proxy.potionlabs.de/$url/feed/dedicated-server-savegame.html?code=$serverCode&file=careerSavegame"
+          .replace("$url", url)
+          .replace("$serverCode", serverCode)
       )
       .then((response) => {
         const options = {
