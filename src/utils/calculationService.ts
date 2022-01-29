@@ -11,6 +11,10 @@ class CalculationService {
         return 0;
     }
   }
+
+  getValueForDifficulty(value: number, difficulty: number): number {
+    return value * calculationService.getDifficultyPriceFactor(difficulty);
+  }
 }
 
 const calculationService = new CalculationService();

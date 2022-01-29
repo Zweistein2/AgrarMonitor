@@ -5,7 +5,7 @@
   >
     <div class="container-fluid">
       <a class="navbar-brand" href="#">
-        <img alt="FS22 Logo" src="../assets/logo.png" height="35" />
+        <img alt="FS22 Logo" src="@/assets/logo.png" height="35" />
       </a>
       <button
         class="navbar-toggler"
@@ -70,7 +70,7 @@
               <tr>
                 <th>Geld</th>
                 <td v-if="metaData.statistics.money">
-                  {{ $n(metaData.statistics.money, "currency", "de-DE") }}
+                  {{ $n(metaData.statistics.money, "currency") }}
                 </td>
               </tr>
               <tr>
@@ -209,12 +209,15 @@
       <div class="card">
         <div class="card-header">
           <h5 class="card-title">
-            <a class="undecorated" data-bs-toggle="collapse" href="#vehicles">{{
-              $t("vehicles")
-            }}</a>
+            <a
+              class="undecorated"
+              data-bs-toggle="collapse"
+              href="#vehicleSettings"
+              >{{ $t("vehicleSettings") }}</a
+            >
           </h5>
         </div>
-        <div class="card-body collapse" id="vehicles">
+        <div class="card-body collapse" id="vehicleSettings">
           <table class="table">
             <tbody>
               <tr>
@@ -327,31 +330,36 @@
       <div class="card mb-3">
         <div class="card-header">
           <h5 class="card-title">
-            <a class="undecorated" data-bs-toggle="collapse" href="#economy">{{
-              $t("economy")
-            }}</a>
+            <a class="undecorated" data-bs-toggle="collapse" href="#economy">
+              {{ $t("economy") }}
+            </a>
+            <img
+              class="economyIcon"
+              v-if="selectedFillType"
+              alt="IconLogo"
+              :src="require(`@/assets/${selectedFillType.fillType}.png`)"
+              height="32"
+            />
           </h5>
         </div>
         <div class="card-body collapse" id="economy">
           <table class="table">
             <tbody>
               <div class="dropdown">
-                <select
+                <v-select
                   v-model="selectedFillType"
-                  class="form-select"
-                  aria-label="Default select example"
+                  :options="economyData.fillTypes.fillType"
+                  :get-option-label="(fillType) => `${$t(fillType.fillType)}`"
                 >
-                  <option disabled value="">
-                    {{ $t("defaultValueFillType") }}
-                  </option>
-                  <option
-                    v-for="filltype in economyData.fillTypes.fillType"
-                    :value="filltype"
-                    :key="filltype.fillType"
-                  >
-                    {{ $t(filltype.fillType) }}
-                  </option>
-                </select>
+                  <template v-slot:option="fillType">
+                    <img
+                      alt="IconLogo"
+                      :src="require(`@/assets/${fillType.fillType}.png`)"
+                      height="32"
+                    />
+                    {{ $t(fillType.fillType) }}
+                  </template>
+                </v-select>
                 <div v-if="selectedFillType">
                   <table class="table">
                     <tbody>
@@ -363,9 +371,11 @@
                         <td>
                           {{
                             $n(
-                              getValueForDifficulty(period.text),
-                              "currency",
-                              "de-DE"
+                              getValueForDifficulty(
+                                period.text,
+                                this.metaData.settings.economicDifficulty
+                              ),
+                              "currency"
                             )
                           }}
                         </td>
@@ -379,38 +389,189 @@
         </div>
       </div>
     </div>
+    <div class="col-3 mb-3">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="card-title">
+            <a class="undecorated" data-bs-toggle="collapse" href="#sold">{{
+              $t("sold")
+            }}</a>
+          </h5>
+        </div>
+        <div class="card-body collapse" id="sold">
+          <table class="table">
+            <tbody>
+              <tr
+                v-for="fillType in economyData.fillTypes.fillType.filter(
+                  (item) => item.totalAmount > 0
+                )"
+                :key="fillType.fillType"
+              >
+                <th>
+                  <img
+                    alt="IconLogo"
+                    :src="require(`@/assets/${fillType.fillType}.png`)"
+                    height="32"
+                  />
+                  {{ $t(fillType.fillType) }}
+                </th>
+                <td>{{ fillType.totalAmount }} L</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="col-3 mb-3">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="card-title">
+            <a class="undecorated" data-bs-toggle="collapse" href="#storage">{{
+              $t("storage")
+            }}</a>
+          </h5>
+        </div>
+        <div class="card-body collapse" id="storage">
+          <table class="table">
+            <tbody>
+              <tr
+                v-for="fillType in economyData.fillTypes.fillType.filter(
+                  (item) => item.totalAmount > 0
+                )"
+                :key="fillType.fillType"
+              >
+                <th>
+                  <img
+                    alt="IconLogo"
+                    :src="require(`@/assets/${fillType.fillType}.png`)"
+                    height="32"
+                  />
+                  {{ $t(fillType.fillType) }}
+                </th>
+                <!-- TODO: Hier müsste das gelagerte Zeugs rein, nicht das bisher verkaufte -->
+                <td>{{ fillType.totalAmount }} L</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="col-3 mb-3">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="card-title">
+            <a class="undecorated" data-bs-toggle="collapse" href="#vehicles">{{
+              $t("vehicles")
+            }}</a>
+          </h5>
+        </div>
+        <div class="card-body collapse" id="vehicles">
+          <table class="table">
+            <tbody>
+              <template
+                v-for="[
+                  category,
+                  vehicleFillStates,
+                ] in vehicleFillData.vehicleFillStates.entries()"
+                :key="category"
+              >
+                <tr>
+                  <th colspan="3">
+                    {{ $t(category) }}
+                  </th>
+                </tr>
+                <template
+                  v-for="vehicleFillState in vehicleFillStates"
+                  :key="vehicleFillState"
+                >
+                  <tr
+                    v-for="(
+                      [fillType, amount], index
+                    ) in vehicleFillState.fillStates"
+                    :key="fillType"
+                  >
+                    <td
+                      v-if="index === 0"
+                      :rowspan="vehicleFillState.fillStates.size"
+                      class="w-35"
+                    >
+                      {{ $t(vehicleFillState.name) }}
+                    </td>
+                    <td class="w-45">
+                      <img
+                        alt="IconLogo"
+                        :src="require(`@/assets/${fillType}.png`)"
+                        height="32"
+                      />
+                      {{ $t(fillType) }}
+                    </td>
+                    <td class="w-20">
+                      {{ $n(amount, "liter") }}
+                    </td>
+                  </tr>
+                </template>
+              </template>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
 import "leaflet/dist/leaflet.css";
+import "@runette/leaflet-fullscreen/dist/leaflet.fullscreen.css";
+import "vue-select/dist/vue-select.css";
 import L from "leaflet";
 import dataService from "@/utils/dataService";
 import calculationService from "@/utils/calculationService";
 import Masonry from "masonry-layout";
+import "@runette/leaflet-fullscreen";
+import vSelect from "vue-select";
 
 export default defineComponent({
   name: "ServerInformations",
-  components: {},
+  components: {
+    "v-select": vSelect,
+  },
   data: () => ({
     center: [0, 0] as L.LatLngExpression,
     bounds: [[-720, -720] as L.LatLngTuple, [720, 720] as L.LatLngTuple],
     serverData: {
-      Slots: {} as SlotWrapper,
-      Mods: {} as ModWrapper,
-      Vehicles: {} as VehicleWrapper,
+      Slots: {
+        Player: [] as Array<Player>,
+      } as SlotWrapper,
+      Mods: {
+        Mod: [] as Array<Mod>,
+      } as ModWrapper,
+      Vehicles: {
+        Vehicle: [] as Array<Vehicle>,
+      } as VehicleWrapper,
+      Fields: {
+        Field: [] as Array<Field>,
+      } as FieldWrapper,
+      Farmlands: {
+        Farmland: [] as Array<Farmland>,
+      } as FarmlandWrapper,
     } as ServerData,
     economyData: {
-      fillTypes: {} as FillTypeWrapper,
+      fillTypes: {
+        fillType: [] as Array<FillType>,
+      } as FillTypeWrapper,
     } as EconomyData,
     metaData: {
       statistics: {} as Statistics,
       settings: {} as Settings,
     } as MetaData,
+    vehicleFillData: {
+      vehicleFillStates: new Map<string, Array<VehicleFillState>>(),
+    } as VehicleFillDataWrapper,
     mapFactor: (1 / 2048) * 1175,
     selectedFillType: "" as FillType | string,
     masonry: {} as Masonry,
+    map: {} as L.Map,
   }),
   computed: {
     elmcreekMap() {
@@ -428,18 +589,92 @@ export default defineComponent({
     marker2x() {
       return require("@/assets/marker-icon-2x.png");
     },
+    playermarker() {
+      return require("@/assets/player-icon.png");
+    },
+    playermarker2x() {
+      return require("@/assets/player-icon-2x.png");
+    },
     markerShadow() {
       return require("@/assets/marker-shadow.png");
     },
   },
   methods: {
-    setupLeafletMap: async function () {
+    queryData: async function () {
       let url = this.$route.query.url as string;
       let serverCode = this.$route.query.serverCode as string;
 
       this.serverData = await dataService.getServerData(url, serverCode);
       this.economyData = await dataService.getEconomyData(url, serverCode);
       this.metaData = await dataService.getMetaData(url, serverCode);
+
+      let mappedFillStatesNotDistinct: Array<Map<string, VehicleFillState>> =
+        this.serverData.Vehicles.Vehicle.map(function (value) {
+          let name = value.name;
+          if (value.type === "pallet" || value.type === "bigBag") {
+            name = value.name + "_" + value.type;
+          } else if (value.type !== undefined && value.type.includes("train")) {
+            name = value.name + "_train";
+          }
+
+          let fillStates = new Map<string, number>();
+
+          if (
+            value.fillTypes !== undefined &&
+            value.fillTypes !== "" &&
+            value.fillLevels !== undefined
+          ) {
+            for (let j = 0; j < value.fillTypes.split(" ").length; j++) {
+              let type = value.fillTypes.split(" ")[j];
+              let level = Number.parseInt(value.fillLevels.split(" ")[j]);
+
+              if (type !== "UNKNOWN" && type !== "AIR") {
+                fillStates.set(type, level);
+              }
+            }
+          }
+
+          return new Map<
+            string,
+            VehicleFillState
+          >([[value.category as string, { name, fillStates } as VehicleFillState]]);
+        });
+
+      this.vehicleFillData = {
+        vehicleFillStates: new Map<string, Array<VehicleFillState>>(),
+      } as VehicleFillDataWrapper;
+
+      mappedFillStatesNotDistinct.forEach((value) =>
+        value.forEach((value: VehicleFillState, key: string) => {
+          if (value.fillStates.size > 0) {
+            if (this.vehicleFillData.vehicleFillStates.has(key)) {
+              let existingData =
+                this.vehicleFillData.vehicleFillStates.get(key);
+
+              if (existingData !== undefined) {
+                this.vehicleFillData.vehicleFillStates.set(
+                  key,
+                  existingData.concat(new Array<VehicleFillState>(value))
+                );
+              } else {
+                this.vehicleFillData.vehicleFillStates.set(
+                  key,
+                  new Array<VehicleFillState>(value)
+                );
+              }
+            } else {
+              this.vehicleFillData.vehicleFillStates.set(
+                key,
+                new Array<VehicleFillState>(value)
+              );
+            }
+          }
+        })
+      );
+
+      console.log(this.vehicleFillData.vehicleFillStates);
+    },
+    setupLeafletMap: async function () {
       delete L.Icon.Default.prototype[
         "_getIconUrl" as never as keyof L.Icon.Default
       ];
@@ -449,20 +684,31 @@ export default defineComponent({
         iconUrl: this.marker,
         shadowUrl: this.markerShadow,
       });
+      const playerIcon = L.icon({
+        iconRetinaUrl: this.playermarker2x,
+        iconUrl: this.playermarker,
+        shadowUrl: this.markerShadow,
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        tooltipAnchor: [16, -28],
+        shadowSize: [41, 41],
+      });
 
-      const map = L.map("mapContainer", {
+      this.map = L.map("mapContainer", {
         crs: L.CRS.Simple,
         center: this.center,
         minZoom: -1,
         zoom: 0,
         maxZoom: 2,
       });
+      this.map.addControl(L.control.fullscreen({}));
       if (this.serverData.mapName === "Elmcreek") {
-        L.imageOverlay(this.elmcreekMap, this.bounds).addTo(map);
+        this.map.addLayer(L.imageOverlay(this.elmcreekMap, this.bounds));
       } else if (this.serverData.mapName === "Erlengrat") {
-        L.imageOverlay(this.erlengratMap, this.bounds).addTo(map);
+        this.map.addLayer(L.imageOverlay(this.erlengratMap, this.bounds));
       } else if (this.serverData.mapName === "Haut-Beyleron") {
-        L.imageOverlay(this.hautbeyleronMap, this.bounds).addTo(map);
+        this.map.addLayer(L.imageOverlay(this.hautbeyleronMap, this.bounds));
       }
       for (let vehicle of this.serverData.Vehicles.Vehicle) {
         if (
@@ -471,18 +717,49 @@ export default defineComponent({
           vehicle.type !== "bigBag" &&
           vehicle.type !== "pallet"
         ) {
-          L.marker(
-            L.latLng(
-              vehicle.z * this.mapFactor * -1,
-              vehicle.x * this.mapFactor
-            )
-          )
-            .addTo(map)
-            .bindTooltip(vehicle.name);
+          if (
+            vehicle.z !== undefined &&
+            vehicle.x !== undefined &&
+            vehicle.name !== undefined
+          ) {
+            this.map.addLayer(
+              L.marker(
+                L.latLng(
+                  vehicle.z * this.mapFactor * -1,
+                  vehicle.x * this.mapFactor
+                )
+              ).bindTooltip(vehicle.name)
+            );
+          }
+        }
+      }
+      if (
+        this.serverData.Slots.numUsed !== undefined &&
+        this.serverData.Slots.numUsed > 0
+      ) {
+        for (let player of this.serverData.Slots.Player) {
+          if (
+            player.isUsed &&
+            player.z !== undefined &&
+            player.x !== undefined &&
+            player.text !== undefined
+          ) {
+            this.map.addLayer(
+              L.marker(
+                L.latLng(
+                  player.z * this.mapFactor * -1,
+                  player.x * this.mapFactor
+                ),
+                {
+                  icon: playerIcon,
+                }
+              ).bindTooltip(player.text)
+            );
+          }
         }
       }
 
-      map.fitBounds(this.bounds);
+      this.map.fitBounds(this.bounds);
     },
     mapPeriodToMonth: function (period: string): string {
       switch (period) {
@@ -514,13 +791,11 @@ export default defineComponent({
           return "UNKNOWN";
       }
     },
-    getValueForDifficulty: function (value: number): number {
-      return (
-        value *
-        calculationService.getDifficultyPriceFactor(
-          this.metaData.settings.economicDifficulty
-        )
-      );
+    getValueForDifficulty: function (
+      value: number,
+      difficulty: number
+    ): number {
+      return calculationService.getValueForDifficulty(value, difficulty);
     },
     updateMasonry: function (): void {
       if (this.masonry.layout) {
@@ -529,12 +804,12 @@ export default defineComponent({
     },
   },
   mounted(): void {
-    let recaptchaScript = document.createElement("script");
-    recaptchaScript.setAttribute(
+    let masonryScript = document.createElement("script");
+    masonryScript.setAttribute(
       "src",
       "https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"
     );
-    document.head.appendChild(recaptchaScript);
+    document.head.appendChild(masonryScript);
 
     let row = document.querySelector("[data-masonry]") as Element;
     this.masonry = new Masonry(row, {
@@ -554,7 +829,18 @@ export default defineComponent({
       }
     }
 
-    this.setupLeafletMap();
+    this.queryData().then(() => {
+      this.selectedFillType = this.economyData.fillTypes.fillType[1];
+      this.setupLeafletMap();
+    });
+    setInterval(
+      () =>
+        this.queryData().then(() => {
+          this.map.remove();
+          this.setupLeafletMap();
+        }),
+      60000
+    );
   },
 });
 </script>
@@ -566,6 +852,10 @@ export default defineComponent({
   height: 21vw;
 }
 
+.economyIcon {
+  position: absolute;
+}
+
 .undecorated {
   text-decoration: none;
   color: var(--bs-body-color);
@@ -573,5 +863,17 @@ export default defineComponent({
 
 .undecorated:hover {
   color: var(--bs-body-color);
+}
+
+.w-35 {
+  width: 35% !important;
+}
+
+.w-45 {
+  width: 45% !important;
+}
+
+.w-20 {
+  width: 20% !important;
 }
 </style>

@@ -7,8 +7,6 @@ const routes: Array<RouteRecordRaw> = [
     path: "/:locale",
     component: Home,
     beforeEnter: (to, from, next) => {
-      console.log("Hello");
-
       const locale = to.params.locale;
       const supported_locales =
         process.env.VUE_APP_I18N_SUPPORTED_LOCALE.split(",");

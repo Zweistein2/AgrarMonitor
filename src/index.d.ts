@@ -1,44 +1,47 @@
 type Vehicle = {
-  name: string;
-  category: string;
-  type: string;
-  x: number;
-  y: number;
-  z: number;
-  fillTypes: string;
-  fillLevels: string;
-  isAIActive: boolean;
+  name: string | undefined;
+  category: string | undefined;
+  type: string | undefined;
+  x: number | undefined;
+  y: number | undefined;
+  z: number | undefined;
+  fillTypes: string | undefined;
+  fillLevels: string | undefined;
+  isAIActive: boolean | undefined;
 };
 
 type Player = {
-  text: string;
-  isUsed: boolean;
-  isAdmin: boolean;
-  uptime: number;
+  text: string | undefined;
+  isUsed: boolean | undefined;
+  isAdmin: boolean | undefined;
+  uptime: number | undefined;
+  x: number | undefined;
+  y: number | undefined;
+  z: number | undefined;
 };
 
 type Mod = {
-  text: string;
-  name: string;
-  author: string;
-  hash: string;
-  version: string;
+  text: string | undefined;
+  name: string | undefined;
+  author: string | undefined;
+  hash: string | undefined;
+  version: string | undefined;
 };
 
 type Field = {
-  id: number;
-  isOwned: boolean;
-  x: number;
-  z: number;
+  id: number | undefined;
+  isOwned: boolean | undefined;
+  x: number | undefined;
+  z: number | undefined;
 };
 
 type Farmland = {
-  area: number;
-  id: number;
-  name: string;
-  owner: number;
-  x: number;
-  z: number;
+  area: number | undefined;
+  id: number | undefined;
+  name: string | undefined;
+  owner: number | undefined;
+  x: number | undefined;
+  z: number | undefined;
 };
 
 type FarmlandWrapper = {
@@ -54,8 +57,8 @@ type ModWrapper = {
 };
 
 type SlotWrapper = {
-  capacity: number;
-  numUsed: number;
+  capacity: number | undefined;
+  numUsed: number | undefined;
   Player: Array<Player>;
 };
 
@@ -69,13 +72,13 @@ type ServerData = {
   Mods: ModWrapper;
   Slots: SlotWrapper;
   Vehicles: VehicleWrapper;
-  dayTime: number;
-  game: string;
-  mapName: string;
-  mapOverviewFilename: string;
-  mapSize: number;
-  name: string;
-  version: string;
+  dayTime: number | undefined;
+  game: string | undefined;
+  mapName: string | undefined;
+  mapOverviewFilename: string | undefined;
+  mapSize: number | undefined;
+  name: string | undefined;
+  version: string | undefined;
 };
 
 type EconomyData = {
@@ -87,8 +90,8 @@ type FillTypeWrapper = {
 };
 
 type FillType = {
-  fillType: string;
-  totalAmount: number;
+  fillType: string | undefined;
+  totalAmount: number | undefined;
   history: History;
 };
 
@@ -97,8 +100,8 @@ type History = {
 };
 
 type Period = {
-  period: number;
-  text: number;
+  period: number | undefined;
+  text: number | undefined;
 };
 
 type MetaData = {
@@ -107,35 +110,44 @@ type MetaData = {
 };
 
 type Settings = {
-  creationDate: string;
-  resetVehicles: boolean;
-  trafficEnabled: boolean;
-  stopAndGoBraking: boolean;
-  trailerFillLimit: boolean;
-  automaticMotorStartEnabled: boolean;
-  fruitDestruction: boolean;
-  plowingRequiredEnabled: boolean;
-  stonesEnabled: boolean;
-  weedsEnabled: boolean;
-  limeRequired: boolean;
-  isSnowEnabled: boolean;
-  helperBuyFuel: boolean;
-  helperBuySeeds: boolean;
-  helperBuyFertilizer: boolean;
-  helperSlurrySource: number;
-  helperManureSource: number;
-  fuelUsage: number;
-  difficulty: number;
-  economicDifficulty: number;
-  dirtInterval: number;
-  timeScale: number;
-  autoSaveInterval: number;
-  growthMode: number;
-  plannedDaysPerPeriod: number;
-  fixedSeasonalVisuals: number;
+  creationDate: string | undefined;
+  resetVehicles: boolean | undefined;
+  trafficEnabled: boolean | undefined;
+  stopAndGoBraking: boolean | undefined;
+  trailerFillLimit: boolean | undefined;
+  automaticMotorStartEnabled: boolean | undefined;
+  fruitDestruction: boolean | undefined;
+  plowingRequiredEnabled: boolean | undefined;
+  stonesEnabled: boolean | undefined;
+  weedsEnabled: boolean | undefined;
+  limeRequired: boolean | undefined;
+  isSnowEnabled: boolean | undefined;
+  helperBuyFuel: boolean | undefined;
+  helperBuySeeds: boolean | undefined;
+  helperBuyFertilizer: boolean | undefined;
+  helperSlurrySource: number | undefined;
+  helperManureSource: number | undefined;
+  fuelUsage: number | undefined;
+  difficulty: number | undefined;
+  economicDifficulty: number | undefined;
+  dirtInterval: number | undefined;
+  timeScale: number | undefined;
+  autoSaveInterval: number | undefined;
+  growthMode: number | undefined;
+  plannedDaysPerPeriod: number | undefined;
+  fixedSeasonalVisuals: number | undefined;
 };
 
 type Statistics = {
-  money: number;
-  playTime: number;
+  money: number | undefined;
+  playTime: number | undefined;
+};
+
+type VehicleFillDataWrapper = {
+  vehicleFillStates: Map<string, Array<VehicleFillState>>;
+};
+
+type VehicleFillState = {
+  name: string | undefined;
+  fillStates: Map<string, number>;
 };

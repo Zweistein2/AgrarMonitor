@@ -24,18 +24,28 @@ function loadLocaleMessages(): LocaleMessages<VueMessageType> {
 }
 
 const numberFormats = {
-  "en-US": {
+  en: {
     currency: {
       style: "currency",
       currency: "USD",
       currencyDisplay: "symbol",
     },
+    liter: {
+      style: "unit",
+      unit: "liter",
+      unitDisplay: "short",
+    },
   },
-  "de-DE": {
+  de: {
     currency: {
       style: "currency",
       currency: "EUR",
       currencyDisplay: "symbol",
+    },
+    liter: {
+      style: "unit",
+      unit: "liter",
+      unitDisplay: "short",
     },
   },
 };
