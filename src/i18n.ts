@@ -29,11 +29,15 @@ const numberFormats = {
       style: "currency",
       currency: "USD",
       currencyDisplay: "symbol",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
     },
     liter: {
       style: "unit",
       unit: "liter",
       unitDisplay: "short",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
     },
   },
   de: {
@@ -41,11 +45,15 @@ const numberFormats = {
       style: "currency",
       currency: "EUR",
       currencyDisplay: "symbol",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
     },
     liter: {
       style: "unit",
       unit: "liter",
       unitDisplay: "short",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
     },
   },
 };
