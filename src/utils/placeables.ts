@@ -1,6 +1,18 @@
 // template: [filename, name]
 const placeableMap = new Map<string, string>([
   [
+    "data/placeables/lizard/bunkerSilo/bunkerSiloLarge/bunkerSiloLarge.xml",
+    "$l10n_storeItem_bunkerSiloLarge",
+  ],
+  [
+    "data/placeables/lizard/bunkerSilo/bunkerSiloMedium/bunkerSiloMedium.xml",
+    "$l10n_storeItem_bunkerSiloMedium",
+  ],
+  [
+    "data/placeables/lizard/bunkerSilo/bunkerSiloSmall/bunkerSiloSmall.xml",
+    "$l10n_storeItem_bunkerSiloSmall",
+  ],
+  [
     "data/placeables/lizard/cowBarnSmall/cowBarnSmall.xml",
     "$l10n_storeItem_animalBarnCowSmall",
   ],
@@ -105,6 +117,31 @@ const placeableMap = new Map<string, string>([
     "data/placeables/lizard/productionPoints/tailorShop/tailorShop.xml",
     "$l10n_shopItem_tailorShop",
   ],
+  ["data/placeables/lizard/sellingPoints/bhp/bhp.xml", "$l10n_shopItem_bhp"],
+  [
+    "data/placeables/lizard/sellingPoints/debrisCrusher/debrisCrusher.xml",
+    "$l10n_shopItem_debrisCrusher",
+  ],
+  [
+    "data/placeables/lizard/sellingPoints/farmersMarket/farmersMarket.xml",
+    "$l10n_shopItem_farmersMarket",
+  ],
+  [
+    "data/placeables/lizard/sellingPoints/fastFoodRestaurant/fastFoodRestaurant.xml",
+    "$l10n_shopItem_fastFoodRestaurant",
+  ],
+  [
+    "data/placeables/lizard/sellingPoints/pizzeria/pizzeria.xml",
+    "$l10n_shopItem_pizzeria",
+  ],
+  [
+    "data/placeables/lizard/sellingPoints/restaurant/restaurant.xml",
+    "$l10n_shopItem_restaurant",
+  ],
+  [
+    "data/placeables/lizard/sellingPoints/supermarket/supermarket.xml",
+    "$l10n_shopItem_supermarket",
+  ],
   [
     "data/placeables/lizard/sheepBarnSmall/sheepBarnSmall.xml",
     "$l10n_storeItem_animalBarnSheepSmall",
@@ -116,6 +153,10 @@ const placeableMap = new Map<string, string>([
   [
     "data/placeables/mapAlpine/bga/alpsBGA.xml",
     "$l10n_shopItem_mapAlpine_biogasPlant",
+  ],
+  [
+    "data/placeables/mapAlpine/bunkerSiloBGA/bunkerSiloBGA.xml",
+    "$l10n_storeItem_alpine_bunkerSiloMedium",
   ],
   [
     "data/placeables/mapAlpine/cheeseFactory/cheeseFactory.xml",
@@ -134,16 +175,32 @@ const placeableMap = new Map<string, string>([
     "GLW",
   ],
   [
+    "data/placeables/mapAlpine/sellingStationBales/sellingStationBales.xml",
+    "$l10n_animals_dealer",
+  ],
+  [
     "data/placeables/mapAlpine/sellingStations/sellingStationMill01.xml",
     "$l10n_station_alpine_mill",
+  ],
+  [
+    "data/placeables/mapAlpine/sellingStations/sellingStationTownStore.xml",
+    "$l10n_station_alpine_supermarket",
   ],
   [
     "data/placeables/mapAlpine/sellingStationWood/sellingStationWood.xml",
     "$l10n_station_alpine_sawmill",
   ],
   [
+    "data/placeables/mapAlpine/sellingStationWoodTrain/sellingStationWoodTrain.xml",
+    "Felsbrunn",
+  ],
+  [
     "data/placeables/mapAlpine/sellingStationWool/sellingStationWool.xml",
     "$l10n_station_alpine_spinnery",
+  ],
+  [
+    "data/placeables/mapAlpine/trainSystem/sellingStationTrain.xml",
+    "Felsbrunn",
   ],
   [
     "data/placeables/mapFR/railroadSilo01/railroadSilo01.xml",
@@ -158,16 +215,36 @@ const placeableMap = new Map<string, string>([
     "$l10n_station_fr_bakery",
   ],
   [
+    "data/placeables/mapFR/sellingStationBales/sellingStationBales.xml",
+    "$l10n_station_fr_livestockMarket",
+  ],
+  [
     "data/placeables/mapFR/sellingStationCheeseDairy/sellingStationCheeseDairy.xml",
     "$l10n_station_fr_cheeseDairy",
+  ],
+  [
+    "data/placeables/mapFR/sellingStationFarmShop/sellingStationFarmShop.xml",
+    "$l10n_station_fr_farmShop",
+  ],
+  [
+    "data/placeables/mapFR/sellingStationGrainElevator/sellingStationGrainElevator.xml",
+    "$l10n_station_fr_grainElevator",
   ],
   [
     "data/placeables/mapFR/sellingStationGrainMill/sellingStationGrainMill.xml",
     "$l10n_station_fr_grainMill",
   ],
   [
+    "data/placeables/mapFR/sellingStationTrain/sellingStationTrain.xml",
+    "$l10n_station_fr_trainOtherTown",
+  ],
+  [
     "data/placeables/mapFR/sellingStationWood/sellingStationWood.xml",
     "$l10n_station_fr_sawmill",
+  ],
+  [
+    "data/placeables/mapFR/sellingStationWoodTrain/sellingStationWoodTrain.xml",
+    "$l10n_station_fr_trainOtherTown",
   ],
   [
     "data/placeables/mapFR/sellingStationWool/sellingStationWool.xml",
@@ -186,6 +263,38 @@ const placeableMap = new Map<string, string>([
     "$l10n_station_us_grainSiloRailroad02",
   ],
   ["data/placeables/mapUS/sawmill/sawmill.xml", "$l10n_station_us_sawmill"],
+  [
+    "data/placeables/mapUS/sellingStationBales/sellingStationBales.xml",
+    "$l10n_animals_dealer",
+  ],
+  [
+    "data/placeables/mapUS/sellingStationBowlingCenter/sellingStationBowlingCenter.xml",
+    "$l10n_station_us_restaurantBowlingCenter",
+  ],
+  [
+    "data/placeables/mapUS/sellingStationGeneric/sellingStationFarmersMarket.xml",
+    "Johnson's Farmers Market",
+  ],
+  [
+    "data/placeables/mapUS/sellingStationGeneric/sellingStationMainGrainSilo.xml",
+    "$l10n_station_us_mainGrainSilo",
+  ],
+  [
+    "data/placeables/mapUS/sellingStationShoppingMall/sellingStationShoppingMall.xml",
+    "$l10n_station_us_shoppingMall",
+  ],
+  [
+    "data/placeables/mapUS/sellingStationTrain/sellingStationTrain.xml",
+    "$l10n_station_us_trainOtherTown",
+  ],
+  [
+    "data/placeables/mapUS/sellingStationWoodHeatingPlant/sellingStationWoodHeatingPlant.xml",
+    "$l10n_station_us_biomassHeatingPlant",
+  ],
+  [
+    "data/placeables/mapUS/sellingStationWoodTrain/sellingStationWoodTrain.xml",
+    "$l10n_station_us_trainStation",
+  ],
   [
     "data/placeables/meridian/fertilizerBins1620/fertilizerBins1620.xml",
     "$l10n_shopItem_meridianFertilizerTank",
@@ -223,6 +332,10 @@ const placeableMap = new Map<string, string>([
     "$l10n_storeItem_planET_bga99kw",
   ],
   [
+    "data/placeables/planET/bgaBunkerSilo/bgaBunkerSilo.xml",
+    "$l10n_storeItem_planet_bunkerSiloLarge",
+  ],
+  [
     "data/placeables/rudolfHormann/chickenBarnBig/chickenBarnBig.xml",
     "$l10n_storeItem_animalBarnChickenBig",
   ],
@@ -253,6 +366,10 @@ const placeableMap = new Map<string, string>([
   [
     "data/placeables/rudolfHormann/pigBarnMedium/pigBarnMedium.xml",
     "$l10n_storeItem_animalBarnPigMedium",
+  ],
+  [
+    "data/placeables/sellingStationGeneric/sellingStationGeneric.xml",
+    "Selling station Generic",
   ],
   ["data/placeables/unia/farma/farma100/farma100.xml", "Farma 100"],
   ["data/placeables/unia/farma/farma150/farma150.xml", "Farma 150"],

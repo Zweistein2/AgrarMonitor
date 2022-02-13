@@ -1,38 +1,16 @@
 <template>
-  <nav
-    class="navbar navbar-expand-lg navbar-light bg-light shadow mb-3"
-    role="navigation"
-  >
-    <div class="container-fluid">
-      <a class="navbar-brand" href="#">
-        <img alt="FS22 Logo" src="@/assets/logo.png" height="35" />
-      </a>
-      <button
-        class="navbar-toggler"
-        type="button"
-        data-bs-toggle="collapse"
-        data-bs-target="#navbarSupportedContent"
-        aria-controls="navbarSupportedContent"
-        aria-expanded="false"
-        aria-label="Toggle navigation"
-      >
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="">Home</a>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </nav>
   <div class="row m-1" data-masonry='{"percentPosition": true }'>
     <div class="col-3 mb-3">
       <div class="card mb-3">
         <div class="card-header">{{ $t("map") }}</div>
         <div class="card-body">
-          <div id="mapContainer"></div>
+          <div id="mapContainer">
+            <mapComponent
+              :meta-data="metaData"
+              :server-data="serverData"
+              :vehicle-data="vehicleData"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -462,6 +440,7 @@
               <div class="dropdown">
                 <v-select
                   v-model="selectedFillType"
+                  :clearable="false"
                   :options="economyData.fillTypes.fillType"
                   :get-option-label="(fillType) => `${$t(fillType.fillType)}`"
                 >
@@ -481,7 +460,17 @@
                         v-for="period in selectedFillType.history.period"
                         :key="period.period"
                       >
-                        <th>{{ $t(mapPeriodToMonth(period.period)) }}</th>
+                        <th>
+                          {{
+                            $d(
+                              new Date(
+                                1999,
+                                Number.parseInt(period.period) + 1
+                              ),
+                              "month"
+                            )
+                          }}
+                        </th>
                         <td>
                           {{
                             $n(
@@ -538,118 +527,6 @@
         </div>
       </div>
     </div>
-    <div v-if="farmsData && placeablesData" class="col-3 mb-3">
-      <div class="card">
-        <div class="card-header">
-          <h5 class="card-title">
-            <a class="undecorated" data-bs-toggle="collapse" href="#storage">{{
-              $t("storage")
-            }}</a>
-          </h5>
-        </div>
-        <div class="card-body collapse" id="storage">
-          <table class="table">
-            <tbody>
-              <template v-for="farm in farmsData.farm" :key="farm.farmId">
-                <tr>
-                  <th colspan="2">
-                    {{ farm.name }}
-                  </th>
-                </tr>
-                <template
-                  v-for="(
-                    fillStatesPerPlaceable, index
-                  ) in storageFillStatesPerFarm.get(farm.farmId)"
-                  :key="index"
-                >
-                  <tr>
-                    <td colspan="2" class="subHeader">
-                      {{ placeableMap.get(fillStatesPerPlaceable[0]) }}
-                    </td>
-                  </tr>
-                  <tr
-                    v-for="fillStates in fillStatesPerPlaceable[1]"
-                    :key="fillStates[0]"
-                  >
-                    <td>
-                      <img
-                        alt="IconLogo"
-                        :src="require(`@/assets/${fillStates[0]}.png`)"
-                        height="32"
-                      />
-                      {{ $t(fillStates[0]) }}
-                    </td>
-                    <td>
-                      {{ $n(Number.parseFloat(fillStates[1]), "liter") }}
-                    </td>
-                  </tr>
-                </template>
-              </template>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-    <div v-if="vehicleFillData" class="col-3 mb-3">
-      <div class="card">
-        <div class="card-header">
-          <h5 class="card-title">
-            <a class="undecorated" data-bs-toggle="collapse" href="#vehicles">{{
-              $t("vehicles")
-            }}</a>
-          </h5>
-        </div>
-        <div class="card-body collapse" id="vehicles">
-          <table class="table">
-            <tbody>
-              <template
-                v-for="[
-                  category,
-                  vehicleFillStates,
-                ] in vehicleFillData.vehicleFillStates.entries()"
-                :key="category"
-              >
-                <tr>
-                  <th colspan="3">
-                    {{ $t(category) }}
-                  </th>
-                </tr>
-                <template
-                  v-for="vehicleFillState in vehicleFillStates"
-                  :key="vehicleFillState"
-                >
-                  <tr
-                    v-for="(
-                      [fillType, amount], index
-                    ) in vehicleFillState.fillStates"
-                    :key="fillType"
-                  >
-                    <td
-                      v-if="index === 0"
-                      :rowspan="vehicleFillState.fillStates.size"
-                      class="w-45"
-                    >
-                      {{ $t(vehicleFillState.name) }}
-                    </td>
-                    <td class="w-35">
-                      <img
-                        alt="IconLogo"
-                        :src="require(`@/assets/${fillType}.png`)"
-                        height="32"
-                      />
-                      {{ $t(fillType) }}
-                    </td>
-                    <td class="w-20">
-                      {{ $n(Number.parseFloat(amount), "liter") }}
-                    </td>
-                  </tr>
-                </template>
-              </template>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
     <div v-if="missionsData" class="col-3 mb-3">
       <div class="card">
         <div class="card-header">
@@ -687,10 +564,8 @@
               data-bs-toggle="collapse"
               href="#environment"
             >
-              {{ $t("environment") }} -
-              {{ forecastData.currentDay.toFixed(0) + ". " }}
-              {{ $t(mapPeriodToMonth(forecastData.currentMonth.toFixed(0))) }} -
-              {{ today.getHours() + ":" + today.getMinutes() }}
+              {{ $t("environment") }} - {{ $d(today, "date") }} -
+              {{ $d(today, "time") }}
             </a>
           </h5>
         </div>
@@ -711,33 +586,24 @@
                     :src="require(`@/assets/WEATHER_${forecast.typeName}.png`)"
                   />
                 </div>
-                <div class="row row3">
-                  {{ forecast.start.getDate() + ". " }}
-                  {{
-                    $t(
-                      mapPeriodToShortMonth(
-                        forecast.start.getMonth().toFixed(0)
-                      )
-                    )
-                  }}
+                <div
+                  class="row row3"
+                  v-if="
+                    $d(forecast.start, 'dateShort') ===
+                    $d(forecast.end, 'dateShort')
+                  "
+                >
+                  {{ $d(forecast.start, "dateShort") }}
+                </div>
+                <div class="row row3" v-else>
+                  {{ $d(forecast.start, "dateShort") }}
                   -
-                  {{ forecast.end.getDate() + ". " }}
-                  {{
-                    $t(
-                      mapPeriodToShortMonth(forecast.end.getMonth().toFixed(0))
-                    )
-                  }}
+                  {{ $d(forecast.end, "dateShort") }}
                 </div>
                 <div class="row row3 mb-5">
-                  {{
-                    forecast.start.getHours() +
-                    ":" +
-                    forecast.start.getMinutes()
-                  }}
+                  {{ $d(forecast.start, "time") }}
                   -
-                  {{
-                    forecast.end.getHours() + ":" + forecast.end.getMinutes()
-                  }}
+                  {{ $d(forecast.end, "time") }}
                 </div>
               </div>
             </template>
@@ -750,26 +616,20 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import "leaflet/dist/leaflet.css";
-import "@runette/leaflet-fullscreen/dist/leaflet.fullscreen.css";
 import "vue-select/dist/vue-select.css";
-import L from "leaflet";
 import Masonry from "masonry-layout";
-import "@runette/leaflet-fullscreen";
 import vSelect from "vue-select";
 import dataService from "@/utils/dataService";
 import calculationService from "@/utils/calculationService";
-import placeableMap from "@/utils/placeables";
-import vehicleMap from "@/utils/vehicles";
+import MapComponent from "@/components/MapComponent.vue";
 
 export default defineComponent({
   name: "ServerInformations",
   components: {
     "v-select": vSelect,
+    mapComponent: MapComponent,
   },
   data: () => ({
-    center: [0, 0] as L.LatLngExpression,
-    bounds: [[-720, -720] as L.LatLngTuple, [720, 720] as L.LatLngTuple],
     serverData: {
       Slots: {
         Player: [] as Array<Player>,
@@ -787,6 +647,7 @@ export default defineComponent({
         Farmland: [] as Array<Farmland>,
       } as FarmlandWrapper,
     } as ServerData,
+    vehicleData: {} as VehicleData,
     economyData: {
       fillTypes: {
         fillType: [] as Array<FillType>,
@@ -796,10 +657,6 @@ export default defineComponent({
       statistics: {} as Statistics,
       settings: {} as Settings,
     } as MetaData,
-    vehicleFillData: {
-      vehicleFillStates: new Map<string, Array<VehicleFillState>>(),
-    } as VehicleFillDataWrapper,
-    vehicleData: {} as VehicleData,
     environmentData: {
       weather: {
         forecast: {
@@ -807,20 +664,6 @@ export default defineComponent({
         } as Forecast,
       } as Weather,
     } as EnvironmentData,
-    placeablesData: {
-      placeable: [
-        {
-          silo: {
-            storage: {
-              node: [] as Array<StorageNode>,
-            } as StorageObject,
-          } as Silo,
-        } as Placeable,
-      ],
-    } as PlaceableData,
-    farmsData: {
-      farm: [] as Array<Farm>,
-    } as FarmsData,
     salesData: {
       item: [] as Array<SalesItem>,
     } as SalesData,
@@ -834,55 +677,20 @@ export default defineComponent({
     } as ForecastData,
     storageFillStatesPerFarm: new Map<
       number,
-      Map<string, Map<string, number>>
+      Array<[string, Map<string, number>]>
     >(),
     today: new Date(),
     forecastDate: new Date(),
-    mapFactor: (1 / 2048) * 1175,
     selectedFillType: "" as FillType | string,
     masonry: {} as Masonry,
-    map: {} as L.Map,
-    placeableMap: placeableMap,
-    vehicleMap: vehicleMap,
   }),
   computed: {
-    elmcreekMap() {
-      return require("@/assets/elmcreek.jpg");
-    },
-    hautbeyleronMap() {
-      return require("@/assets/hautbeyleron.jpg");
-    },
-    erlengratMap() {
-      return require("@/assets/erlengrat.jpg");
-    },
-    marker() {
-      return require("@/assets/marker-icon.png");
-    },
-    marker2x() {
-      return require("@/assets/marker-icon-2x.png");
-    },
-    playermarker() {
-      return require("@/assets/player-icon.png");
-    },
-    playermarker2x() {
-      return require("@/assets/player-icon-2x.png");
-    },
-    markerShadow() {
-      return require("@/assets/marker-shadow.png");
+    locale() {
+      return this.$i18n.locale;
     },
   },
   methods: {
     queryData: async function () {
-      let categories = Array<string>();
-
-      for (let value of vehicleMap.values()) {
-        if (!categories.includes(value[2])) {
-          categories.push(value[2]);
-        }
-      }
-
-      console.log(categories);
-
       let url = this.$route.query.url as string;
       let serverCode = this.$route.query.serverCode as string;
       let savegame = this.$route.query.savegame as string;
@@ -893,126 +701,18 @@ export default defineComponent({
         serverCode,
         savegame
       );
-      this.metaData = await dataService.getMetaData(url, serverCode, savegame);
-      this.environmentData = await dataService.getEnvironmentData(
-        url,
-        savegame
-      );
       this.vehicleData = await dataService.getVehicleData(
         url,
         serverCode,
         savegame
       );
-      this.placeablesData = await dataService.getPlaceablesData(url, savegame);
-      this.farmsData = await dataService.getFarmsData(url, savegame);
+      this.metaData = await dataService.getMetaData(url, serverCode, savegame);
+      this.environmentData = await dataService.getEnvironmentData(
+        url,
+        savegame
+      );
       this.salesData = await dataService.getSalesData(url, savegame);
       this.missionsData = await dataService.getMissionsData(url, savegame);
-
-      if (this.serverData && this.serverData.Vehicles) {
-        let mappedFillStatesNotDistinct: Array<Map<string, VehicleFillState>> =
-          this.serverData.Vehicles.Vehicle.map(function (value) {
-            let name = value.name;
-            if (value.type === "pallet" || value.type === "bigBag") {
-              name = value.name + "_" + value.type;
-            } else if (value.type && value.type.includes("train")) {
-              name = value.name + "_train";
-            }
-
-            let fillStates = new Map<string, number>();
-
-            if (value.fillTypes && value.fillTypes !== "" && value.fillLevels) {
-              for (let i = 0; i < value.fillTypes.split(" ").length; i++) {
-                let type = value.fillTypes.split(" ")[i];
-                let level = Number.parseFloat(value.fillLevels.split(" ")[i]);
-
-                if (type !== "UNKNOWN" && type !== "AIR") {
-                  fillStates.set(type, level);
-                }
-              }
-            }
-
-            return new Map<
-              string,
-              VehicleFillState
-            >([[value.category as string, { name, fillStates } as VehicleFillState]]);
-          });
-
-        this.vehicleFillData = {
-          vehicleFillStates: new Map<string, Array<VehicleFillState>>(),
-        } as VehicleFillDataWrapper;
-
-        mappedFillStatesNotDistinct.forEach((value) =>
-          value.forEach((value: VehicleFillState, key: string) => {
-            if (value.fillStates.size > 0) {
-              this.vehicleFillData.vehicleFillStates = this.mergeArray(
-                this.vehicleFillData.vehicleFillStates,
-                key,
-                new Array<VehicleFillState>(value)
-              );
-            }
-          })
-        );
-      } else if (this.vehicleData) {
-        let mappedFillStatesNotDistinct: Array<Map<string, VehicleFillState>> =
-          this.vehicleData.vehicle.map((value) => {
-            if (value.filename) {
-              let brand = this.getVehicleBrandByMap(value.filename, "");
-              let name = this.getVehicleNameByMap(value.filename, "UNKNOWN");
-
-              if (brand !== "") {
-                name = brand.concat(" ").concat(name);
-              }
-              let fillStates = new Map<string, number>();
-
-              if (value.fillUnit && value.fillUnit.unit) {
-                for (let i = 0; i < value.fillUnit.unit.length; i++) {
-                  let type = value.fillUnit.unit[i].fillType;
-                  let level = value.fillUnit.unit[i].fillLevel;
-
-                  if (type && level && type !== "UNKNOWN" && type !== "AIR") {
-                    fillStates.set(type, level);
-                  }
-                }
-              }
-
-              return new Map<string, VehicleFillState>([
-                [
-                  this.getVehicleCategoryByMap(
-                    value.filename,
-                    "UNKNOWN"
-                  ) as string,
-                  { name, fillStates } as VehicleFillState,
-                ],
-              ]);
-            } else {
-              return new Map<string, VehicleFillState>([
-                [
-                  "",
-                  {
-                    name: "",
-                    fillStates: new Map<string, number>(),
-                  } as VehicleFillState,
-                ],
-              ]);
-            }
-          });
-
-        this.vehicleFillData = {
-          vehicleFillStates: new Map<string, Array<VehicleFillState>>(),
-        } as VehicleFillDataWrapper;
-
-        mappedFillStatesNotDistinct.forEach((value) =>
-          value.forEach((value: VehicleFillState, key: string) => {
-            if (value.fillStates.size > 0) {
-              this.vehicleFillData.vehicleFillStates = this.mergeArray(
-                this.vehicleFillData.vehicleFillStates,
-                key,
-                new Array<VehicleFillState>(value)
-              );
-            }
-          })
-        );
-      }
 
       if (
         this.environmentData &&
@@ -1032,15 +732,16 @@ export default defineComponent({
             this.environmentData.currentDay / this.environmentData.daysPerPeriod
           ) % 12;
         this.forecastData.currentDay =
-          (this.environmentData.currentDay /
+          ((this.environmentData.currentDay /
             this.environmentData.daysPerPeriod -
             this.forecastData.currentMonth +
             1) *
-          this.environmentData.daysPerPeriod;
+            this.environmentData.daysPerPeriod) %
+          12;
 
         this.today = new Date(
           1999,
-          this.forecastData.currentMonth,
+          this.forecastData.currentMonth + 1,
           this.forecastData.currentDay,
           ~~(this.environmentData.dayTime / 60),
           ~~(this.environmentData.dayTime % 60)
@@ -1120,255 +821,6 @@ export default defineComponent({
           }
         }
       }
-
-      this.storageFillStatesPerFarm = new Map<
-        number,
-        Map<string, Map<string, number>>
-      >();
-
-      if (this.placeablesData) {
-        for (let placeable of this.placeablesData.placeable) {
-          if (
-            placeable.silo &&
-            placeable.silo.storage &&
-            placeable.silo.storage.node &&
-            placeable.silo.storage.node.length > 0 &&
-            placeable.farmId &&
-            placeable.farmId > 0
-          ) {
-            for (let node of placeable.silo.storage.node) {
-              let fillStateForPlaceable = new Map<
-                string,
-                Map<string, number>
-              >();
-              if (
-                node.fillType &&
-                node.fillLevel &&
-                placeable.silo.storage.farmId &&
-                placeable.filename
-              ) {
-                let fillStates = new Map<string, number>();
-
-                fillStates.set(node.fillType, node.fillLevel);
-                fillStateForPlaceable.set(
-                  this.getPlaceableNameByMap(placeable.filename, "UNKNOWN"),
-                  fillStates
-                );
-                this.storageFillStatesPerFarm.set(
-                  placeable.silo.storage.farmId,
-                  fillStateForPlaceable
-                );
-              }
-            }
-          }
-        }
-      }
-
-      if (
-        this.farmsData &&
-        this.farmsData.farm &&
-        this.farmsData.farm.length > 0
-      ) {
-        for (let farm of this.farmsData.farm) {
-          farm.farmId;
-        }
-      }
-    },
-    setupLeafletMap: async function () {
-      delete L.Icon.Default.prototype[
-        "_getIconUrl" as never as keyof L.Icon.Default
-      ];
-
-      L.Icon.Default.mergeOptions({
-        iconRetinaUrl: this.marker2x,
-        iconUrl: this.marker,
-        shadowUrl: this.markerShadow,
-      });
-      const playerIcon = L.icon({
-        iconRetinaUrl: this.playermarker2x,
-        iconUrl: this.playermarker,
-        shadowUrl: this.markerShadow,
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-        tooltipAnchor: [16, -28],
-        shadowSize: [41, 41],
-      });
-
-      this.map = L.map("mapContainer", {
-        crs: L.CRS.Simple,
-        center: this.center,
-        minZoom: -1,
-        zoom: 0,
-        maxZoom: 2,
-      });
-      this.map.addControl(L.control.fullscreen({}));
-
-      if (this.serverData) {
-        if (this.serverData.mapName === "Elmcreek") {
-          this.map.addLayer(L.imageOverlay(this.elmcreekMap, this.bounds));
-        } else if (this.serverData.mapName === "Erlengrat") {
-          this.map.addLayer(L.imageOverlay(this.erlengratMap, this.bounds));
-        } else if (this.serverData.mapName === "Haut-Beyleron") {
-          this.map.addLayer(L.imageOverlay(this.hautbeyleronMap, this.bounds));
-        } else {
-          this.map.addLayer(L.imageOverlay(this.elmcreekMap, this.bounds));
-        }
-        if (this.serverData.Vehicles) {
-          for (let vehicle of this.serverData.Vehicles.Vehicle) {
-            if (
-              vehicle.type !== "trainTrailer" &&
-              vehicle.type !== "trainTimberTrailer" &&
-              vehicle.type !== "bigBag" &&
-              vehicle.type !== "pallet"
-            ) {
-              if (vehicle.z && vehicle.x && vehicle.name) {
-                this.map.addLayer(
-                  L.marker(
-                    L.latLng(
-                      vehicle.z * this.mapFactor * -1,
-                      vehicle.x * this.mapFactor
-                    )
-                  ).bindTooltip(vehicle.name)
-                );
-              }
-            }
-          }
-        }
-        if (
-          this.serverData.Slots &&
-          this.serverData.Slots.numUsed &&
-          this.serverData.Slots.numUsed > 0
-        ) {
-          for (let player of this.serverData.Slots.Player) {
-            if (player.isUsed && player.z && player.x && player.text) {
-              this.map.addLayer(
-                L.marker(
-                  L.latLng(
-                    player.z * this.mapFactor * -1,
-                    player.x * this.mapFactor
-                  ),
-                  {
-                    icon: playerIcon,
-                  }
-                ).bindTooltip(player.text)
-              );
-            }
-          }
-        }
-      } else {
-        if (
-          this.metaData &&
-          this.metaData.settings &&
-          this.metaData.settings.mapTitle
-        ) {
-          if (this.metaData.settings.mapTitle === "Elmcreek") {
-            this.map.addLayer(L.imageOverlay(this.elmcreekMap, this.bounds));
-          } else if (this.metaData.settings.mapTitle === "Erlengrat") {
-            this.map.addLayer(L.imageOverlay(this.erlengratMap, this.bounds));
-          } else if (this.metaData.settings.mapTitle === "Haut-Beyleron") {
-            this.map.addLayer(
-              L.imageOverlay(this.hautbeyleronMap, this.bounds)
-            );
-          }
-        } else {
-          this.map.addLayer(L.imageOverlay(this.elmcreekMap, this.bounds));
-        }
-
-        if (this.vehicleData) {
-          for (let vehicle of this.vehicleData.vehicle) {
-            for (let component of vehicle.component) {
-              if (
-                component.index === "1" &&
-                component.position &&
-                vehicle.filename
-              ) {
-                let z = Number.parseFloat(component.position.split(" ")[2]);
-                let x = Number.parseFloat(component.position.split(" ")[0]);
-                let brand = this.getVehicleBrandByMap(vehicle.filename, "");
-                let name = this.getVehicleNameByMap(
-                  vehicle.filename,
-                  "UNKNOWN"
-                );
-
-                if (brand !== "") {
-                  name = brand.concat(" ").concat(name);
-                }
-
-                this.map.addLayer(
-                  L.marker(
-                    L.latLng(z * this.mapFactor * -1, x * this.mapFactor)
-                  ).bindTooltip(name)
-                );
-              }
-            }
-          }
-        }
-      }
-
-      this.map.fitBounds(this.bounds);
-    },
-    mapPeriodToMonth: function (period: string): string {
-      switch (period) {
-        case "1":
-          return "MARCH";
-        case "2":
-          return "APRIL";
-        case "3":
-          return "MAY";
-        case "4":
-          return "JUNE";
-        case "5":
-          return "JULY";
-        case "6":
-          return "AUGUST";
-        case "7":
-          return "SEPTEMBER";
-        case "8":
-          return "OCTOBER";
-        case "9":
-          return "NOVEMBER";
-        case "10":
-          return "DECEMBER";
-        case "11":
-          return "JANUARY";
-        case "12":
-        case "0":
-          return "FEBRUARY";
-        default:
-          return "UNKNOWN";
-      }
-    },
-    mapPeriodToShortMonth: function (period: string): string {
-      switch (period) {
-        case "1":
-          return "MARCH_SHORT";
-        case "2":
-          return "APRIL_SHORT";
-        case "3":
-          return "MAY_SHORT";
-        case "4":
-          return "JUNE_SHORT";
-        case "5":
-          return "JULY_SHORT";
-        case "6":
-          return "AUGUST_SHORT";
-        case "7":
-          return "SEPTEMBER_SHORT";
-        case "8":
-          return "OCTOBER_SHORT";
-        case "9":
-          return "NOVEMBER_SHORT";
-        case "10":
-          return "DECEMBER_SHORT";
-        case "11":
-          return "JANUARY_SHORT";
-        case "12":
-        case "0":
-          return "FEBRUARY_SHORT";
-        default:
-          return "UNKNOWN";
-      }
     },
     getValueForDifficulty: function (
       value: number,
@@ -1380,116 +832,6 @@ export default defineComponent({
       if (this.masonry.layout) {
         this.masonry.layout();
       }
-    },
-    mergeMap: function <Type1, Type2 extends Map<unknown, unknown>>(
-      arr: Map<Type1, Type2>,
-      key: Type1,
-      value: Type2
-    ): Map<Type1, Type2> {
-      let existingData = arr.get(key);
-
-      if (existingData) {
-        let tempMap = existingData;
-
-        for (let [key, valueElement] of value) {
-          tempMap = existingData.set(key, valueElement);
-        }
-
-        return arr.set(key, tempMap);
-      } else {
-        return arr.set(key, value);
-      }
-    },
-    mergeArray: function <T, T2>(
-      arr: Map<T, T2[]>,
-      key: T,
-      value: T2[]
-    ): Map<T, T2[]> {
-      let existingData = arr.get(key);
-
-      if (existingData) {
-        return arr.set(key, existingData.concat(value));
-      } else {
-        return arr.set(key, value);
-      }
-    },
-    getPlaceableNameByMap: function (
-      placeableFilename: string,
-      defaultValue: string
-    ): string {
-      if (placeableMap.has(placeableFilename)) {
-        let placeableName = placeableMap.get(placeableFilename);
-
-        if (placeableName) {
-          if (placeableName.startsWith("$l10n_")) {
-            return this.$t(placeableName);
-          } else {
-            return placeableName;
-          }
-        }
-      }
-
-      return defaultValue;
-    },
-    getVehicleNameByMap: function (
-      vehicleFilename: string,
-      defaultValue: string
-    ): string {
-      if (vehicleMap.has(vehicleFilename)) {
-        let vehicleMapData = vehicleMap.get(vehicleFilename);
-
-        if (vehicleMapData && vehicleMapData[3]) {
-          if (vehicleMapData[3].startsWith("$l10n_")) {
-            return this.$t(vehicleMapData[3]);
-          } else {
-            return vehicleMapData[3];
-          }
-        }
-      }
-
-      return defaultValue;
-    },
-    getVehicleCategoryByMap: function (
-      vehicleFilename: string,
-      defaultValue: string
-    ): string {
-      if (vehicleMap.has(vehicleFilename)) {
-        let vehicleMapData = vehicleMap.get(vehicleFilename);
-
-        if (vehicleMapData && vehicleMapData[2]) {
-          return vehicleMapData[2].toUpperCase();
-        }
-      }
-
-      return defaultValue;
-    },
-    getVehicleBrandByMap: function (
-      vehicleFilename: string,
-      defaultValue: string
-    ): string {
-      if (vehicleMap.has(vehicleFilename)) {
-        let vehicleMapData = vehicleMap.get(vehicleFilename);
-
-        if (vehicleMapData && vehicleMapData[1]) {
-          return vehicleMapData[1];
-        }
-      }
-
-      return defaultValue;
-    },
-    getVehicleTypeByMap: function (
-      vehicleFilename: string,
-      defaultValue: string
-    ): string {
-      if (vehicleMap.has(vehicleFilename)) {
-        let vehicleMapData = vehicleMap.get(vehicleFilename);
-
-        if (vehicleMapData && vehicleMapData[0]) {
-          return vehicleMapData[0];
-        }
-      }
-
-      return defaultValue;
     },
   },
   mounted(): void {
@@ -1504,16 +846,8 @@ export default defineComponent({
       if (this.economyData) {
         this.selectedFillType = this.economyData.fillTypes.fillType[1];
       }
-      this.setupLeafletMap();
     });
-    setInterval(
-      () =>
-        this.queryData().then(() => {
-          this.map.remove();
-          this.setupLeafletMap();
-        }),
-      60000
-    );
+    setInterval(() => this.queryData(), 60000);
 
     let row = document.querySelector("[data-masonry]") as Element;
     this.masonry = new Masonry(row, {

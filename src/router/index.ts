@@ -1,11 +1,15 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 import i18n from "@/i18n";
 import Home from "@/views/Home.vue";
+import StorageView from "@/views/StorageView.vue";
+import VehicleView from "@/views/VehicleView.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
     path: "/:locale",
-    component: Home,
+    component: {
+      template: "<router-view></router-view>",
+    },
     beforeEnter: (to, from, next) => {
       const locale = to.params.locale;
       const supported_locales =
@@ -20,6 +24,23 @@ const routes: Array<RouteRecordRaw> = [
 
       return next();
     },
+    children: [
+      {
+        path: "",
+        name: "Home",
+        component: Home,
+      },
+      {
+        path: "storage",
+        name: "Storage",
+        component: StorageView,
+      },
+      {
+        path: "vehicles",
+        name: "Vehicles",
+        component: VehicleView,
+      },
+    ],
   },
   {
     path: "/",

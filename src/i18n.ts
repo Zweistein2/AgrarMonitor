@@ -57,12 +57,94 @@ const numberFormats = {
     },
   },
 };
+const dateTimeFormats = {
+  en: {
+    time: {
+      hour: "numeric",
+      minute: "numeric",
+    },
+    date: {
+      month: "long",
+      day: "numeric",
+    },
+    dateShort: {
+      month: "short",
+      day: "numeric",
+    },
+    month: {
+      month: "long",
+    },
+  },
+  de: {
+    time: {
+      hour: "numeric",
+      minute: "numeric",
+    },
+    date: {
+      month: "long",
+      day: "numeric",
+    },
+    dateShort: {
+      month: "short",
+      day: "numeric",
+    },
+    month: {
+      month: "long",
+    },
+  },
+};
+
+function supportedLocalesInclude(locale: string): boolean {
+  const locales = require.context(
+    "./locales",
+    true,
+    /[A-Za-z0-9-_,\s]+\.json$/i
+  );
+
+  locales.keys().forEach((key) => {
+    if (key === locale) {
+      return true;
+    }
+  });
+
+  return false;
+}
+
+function getBrowserLocale(options = {}): string {
+  const defaultOptions = { countryCodeOnly: false };
+
+  const opt = { ...defaultOptions, ...options };
+
+  const navigatorLocale =
+    navigator.languages !== undefined
+      ? navigator.languages[0]
+      : navigator.language;
+
+  if (!navigatorLocale) {
+    return "en";
+  }
+
+  return opt.countryCodeOnly
+    ? navigatorLocale.trim().split(/-|_/)[0]
+    : navigatorLocale.trim();
+}
+
+function getStartingLocale() {
+  const browserLocale = getBrowserLocale({ countryCodeOnly: true });
+
+  if (supportedLocalesInclude(browserLocale)) {
+    return browserLocale;
+  } else {
+    return process.env.VUE_APP_I18N_LOCALE || "de";
+  }
+}
 
 export default createI18n({
   legacy: false,
-  locale: process.env.VUE_APP_I18N_LOCALE || "de",
+  locale: getStartingLocale(),
   fallbackLocale: process.env.VUE_APP_I18N_FALLBACK_LOCALE || "en",
   messages: loadLocaleMessages(),
   numberFormats: numberFormats,
+  datetimeFormats: dateTimeFormats,
   globalInjection: true,
 });

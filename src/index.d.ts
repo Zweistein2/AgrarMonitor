@@ -157,10 +157,6 @@ type MetaMod = {
   fileHash: string | undefined;
 };
 
-type VehicleFillDataWrapper = {
-  vehicleFillStates: Map<string, Array<VehicleFillState>>;
-};
-
 type VehicleFillState = {
   name: string | undefined;
   fillStates: Map<string, number>;
