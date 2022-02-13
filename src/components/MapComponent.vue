@@ -1,7 +1,5 @@
 <template>
-  <table class="table">
-    <tbody></tbody>
-  </table>
+  <div id="mapContainer"></div>
 </template>
 
 <script lang="ts">
@@ -186,17 +184,23 @@ export default defineComponent({
           }
         }
       }
-
-      this.map.fitBounds(this.bounds);
     },
   },
-  beforeUpdate(): void {
-    if (this.map) {
+  updated(): void {
+    if (Object.keys(this.map).length > 0) {
       this.map.remove();
     }
-    this.setupLeafletMap();
+    if (this.vehicleData && this.vehicleData.vehicle) {
+      this.setupLeafletMap();
+    }
   },
 });
 </script>
 
-<style scoped></style>
+<style scoped>
+#mapContainer {
+  margin: auto;
+  width: 21vw;
+  height: 21vw;
+}
+</style>

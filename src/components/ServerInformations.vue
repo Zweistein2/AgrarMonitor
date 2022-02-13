@@ -4,18 +4,21 @@
       <div class="card mb-3">
         <div class="card-header">{{ $t("map") }}</div>
         <div class="card-body">
-          <div id="mapContainer">
-            <mapComponent
-              :meta-data="metaData"
-              :server-data="serverData"
-              :vehicle-data="vehicleData"
-            />
-          </div>
+          <mapComponent
+            :meta-data="metaData"
+            :server-data="serverData"
+            :vehicle-data="vehicleData"
+          />
         </div>
       </div>
     </div>
     <div
-      v-if="serverData && Object.keys(serverData).length > 5 && metaData"
+      v-if="
+        serverData &&
+        Object.keys(serverData).length > 5 &&
+        metaData &&
+        Object.keys(metaData).length > 2
+      "
       class="col-3 mb-3"
     >
       <div class="card">
@@ -98,7 +101,8 @@
     <div
       v-if="
         ((serverData && Object.keys(serverData).length <= 5) || !serverData) &&
-        metaData
+        metaData &&
+        Object.keys(metaData).length > 2
       "
       class="col-3 mb-3"
     >
@@ -171,7 +175,7 @@
         </div>
       </div>
     </div>
-    <div v-if="metaData" class="col-3 mb-3">
+    <div v-if="metaData && Object.keys(metaData).length > 2" class="col-3 mb-3">
       <div class="card">
         <div class="card-header">
           <h5 class="card-title">
@@ -217,7 +221,7 @@
         </div>
       </div>
     </div>
-    <div v-if="metaData" class="col-3 mb-3">
+    <div v-if="metaData && Object.keys(metaData).length > 2" class="col-3 mb-3">
       <div class="card">
         <div class="card-header">
           <h5 class="card-title">
@@ -264,7 +268,7 @@
         </div>
       </div>
     </div>
-    <div v-if="metaData" class="col-3 mb-3">
+    <div v-if="metaData && Object.keys(metaData).length > 2" class="col-3 mb-3">
       <div class="card">
         <div class="card-header">
           <h5 class="card-title">
@@ -316,7 +320,7 @@
         </div>
       </div>
     </div>
-    <div v-if="metaData" class="col-3 mb-3">
+    <div v-if="metaData && Object.keys(metaData).length > 2" class="col-3 mb-3">
       <div class="card">
         <div class="card-header">
           <h5 class="card-title">
@@ -391,7 +395,8 @@
     <div
       v-if="
         ((serverData && Object.keys(serverData).length <= 5) || !serverData) &&
-        metaData
+        metaData &&
+        Object.keys(metaData).length > 2
       "
       class="col-3 mb-3"
     >
@@ -418,7 +423,15 @@
         </div>
       </div>
     </div>
-    <div v-if="economyData" class="col-3 mb-3">
+    <div
+      v-if="
+        economyData &&
+        economyData.fillTypes &&
+        economyData.fillTypes.fillType &&
+        Object.keys(economyData.fillTypes.fillType).length > 0
+      "
+      class="col-3 mb-3"
+    >
       <div class="card">
         <div class="card-header">
           <h5 class="card-title">
@@ -492,7 +505,15 @@
         </div>
       </div>
     </div>
-    <div v-if="economyData" class="col-3 mb-3">
+    <div
+      v-if="
+        economyData &&
+        economyData.fillTypes &&
+        economyData.fillTypes.fillType &&
+        Object.keys(economyData.fillTypes.fillType).length > 0
+      "
+      class="col-3 mb-3"
+    >
       <div class="card">
         <div class="card-header">
           <h5 class="card-title">
@@ -527,7 +548,10 @@
         </div>
       </div>
     </div>
-    <div v-if="missionsData" class="col-3 mb-3">
+    <div
+      v-if="missionsData && Object.keys(missionsData).length > 1"
+      class="col-3 mb-3"
+    >
       <div class="card">
         <div class="card-header">
           <h5 class="card-title">
@@ -555,7 +579,10 @@
         </div>
       </div>
     </div>
-    <div v-if="forecastData" class="col-6 mb-3">
+    <div
+      v-if="forecastData && Object.keys(forecastData).length > 3"
+      class="col-6 mb-3"
+    >
       <div class="card">
         <div class="card-header">
           <h5 class="card-title">
@@ -846,37 +873,31 @@ export default defineComponent({
       if (this.economyData) {
         this.selectedFillType = this.economyData.fillTypes.fillType[1];
       }
+
+      let row = document.querySelector("[data-masonry]") as Element;
+      this.masonry = new Masonry(row, {
+        percentPosition: true,
+      });
+
+      let elements = document.getElementsByClassName("collapse");
+      for (let i = 0; i < elements.length; i++) {
+        let element = elements.item(i);
+        if (element !== null) {
+          element.addEventListener("hidden.bs.collapse", () => {
+            this.updateMasonry();
+          });
+          element.addEventListener("shown.bs.collapse", () => {
+            this.updateMasonry();
+          });
+        }
+      }
     });
     setInterval(() => this.queryData(), 60000);
-
-    let row = document.querySelector("[data-masonry]") as Element;
-    this.masonry = new Masonry(row, {
-      percentPosition: true,
-    });
-
-    let elements = document.getElementsByClassName("collapse");
-    for (let i = 0; i < elements.length; i++) {
-      let element = elements.item(i);
-      if (element !== null) {
-        element.addEventListener("hidden.bs.collapse", () => {
-          this.updateMasonry();
-        });
-        element.addEventListener("shown.bs.collapse", () => {
-          this.updateMasonry();
-        });
-      }
-    }
   },
 });
 </script>
 
 <style scoped>
-#mapContainer {
-  margin: auto;
-  width: 21vw;
-  height: 21vw;
-}
-
 .economyIcon {
   position: absolute;
 }
@@ -888,18 +909,6 @@ export default defineComponent({
 
 .undecorated:hover {
   color: var(--bs-body-color);
-}
-
-.w-35 {
-  width: 35% !important;
-}
-
-.w-45 {
-  width: 45% !important;
-}
-
-.w-20 {
-  width: 20% !important;
 }
 
 .weatherIcon {
