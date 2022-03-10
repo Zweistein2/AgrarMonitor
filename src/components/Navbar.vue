@@ -5,7 +5,20 @@
   >
     <div class="container-fluid">
       <a class="navbar-brand" href="#">
-        <img alt="FS22 Logo" src="@/assets/logo.png" height="35" />
+        <router-link
+          :to="{
+            name: 'Overview',
+            params: {
+              locale: this.$i18n.locale,
+            },
+            query: {
+              serverCode: this.$route.query.serverCode,
+              savegame: this.$route.query.savegame,
+            },
+          }"
+        >
+          <img alt="FS22 Logo" src="@/assets/logo.png" height="35" />
+        </router-link>
       </a>
       <button
         class="navbar-toggler"
@@ -23,14 +36,13 @@
           <li class="nav-item">
             <router-link
               class="nav-link"
-              id="homeLink"
+              id="overviewLink"
               :to="{
-                name: 'Home',
+                name: 'Overview',
                 params: {
                   locale: this.$i18n.locale,
                 },
                 query: {
-                  url: this.$route.query.url,
                   serverCode: this.$route.query.serverCode,
                   savegame: this.$route.query.savegame,
                 },
@@ -49,7 +61,6 @@
                   locale: this.$i18n.locale,
                 },
                 query: {
-                  url: this.$route.query.url,
                   serverCode: this.$route.query.serverCode,
                   savegame: this.$route.query.savegame,
                 },
@@ -68,7 +79,6 @@
                   locale: this.$i18n.locale,
                 },
                 query: {
-                  url: this.$route.query.url,
                   serverCode: this.$route.query.serverCode,
                   savegame: this.$route.query.savegame,
                 },
@@ -80,14 +90,31 @@
           <li class="nav-item">
             <router-link
               class="nav-link"
-              id="statisticsLink"
+              id="missionLink"
               :to="{
-                name: 'Storage',
+                name: 'Mission',
                 params: {
                   locale: this.$i18n.locale,
                 },
                 query: {
-                  url: this.$route.query.url,
+                  serverCode: this.$route.query.serverCode,
+                  savegame: this.$route.query.savegame,
+                },
+              }"
+            >
+              {{ $t("missions") }}
+            </router-link>
+          </li>
+          <li class="nav-item">
+            <router-link
+              class="nav-link"
+              id="statisticsLink"
+              :to="{
+                name: 'Statistics',
+                params: {
+                  locale: this.$i18n.locale,
+                },
+                query: {
                   serverCode: this.$route.query.serverCode,
                   savegame: this.$route.query.savegame,
                 },
@@ -101,12 +128,11 @@
               class="nav-link"
               id="balanceLink"
               :to="{
-                name: 'Storage',
+                name: 'Balance',
                 params: {
                   locale: this.$i18n.locale,
                 },
                 query: {
-                  url: this.$route.query.url,
                   serverCode: this.$route.query.serverCode,
                   savegame: this.$route.query.savegame,
                 },
@@ -115,7 +141,73 @@
               {{ $t("balance") }}
             </router-link>
           </li>
+          <li class="nav-item">
+            <router-link
+              class="nav-link"
+              id="calculatorLink"
+              :to="{
+                name: 'Calculation',
+                params: {
+                  locale: this.$i18n.locale,
+                },
+                query: {
+                  serverCode: this.$route.query.serverCode,
+                  savegame: this.$route.query.savegame,
+                },
+              }"
+            >
+              {{ $t("calculator") }}
+            </router-link>
+          </li>
+          <li class="nav-item">
+            <router-link
+              class="nav-link disabled"
+              id="productionsLink"
+              :to="{
+                name: 'Balance',
+                params: {
+                  locale: this.$i18n.locale,
+                },
+                query: {
+                  serverCode: this.$route.query.serverCode,
+                  savegame: this.$route.query.savegame,
+                },
+              }"
+            >
+              {{ $t("productions") }}
+            </router-link>
+          </li>
+          <li class="nav-item">
+            <router-link
+              class="nav-link disabled"
+              id="tricksLink"
+              :to="{
+                name: 'Balance',
+                params: {
+                  locale: this.$i18n.locale,
+                },
+                query: {
+                  serverCode: this.$route.query.serverCode,
+                  savegame: this.$route.query.savegame,
+                },
+              }"
+            >
+              {{ $t("tricks") }}
+            </router-link>
+          </li>
         </ul>
+      </div>
+      <div
+        class="mb-2 mb-lg-0 me-2 pe-2 separated"
+        v-if="
+          today !== undefined &&
+          environmentData !== undefined &&
+          Object.keys(environmentData).length > 1
+        "
+      >
+        {{ $t("ingameTime") }}
+        {{ $d(today, "date") }} -
+        {{ $d(today, "time") }}
       </div>
       <div class="mb-2 mb-lg-0">
         <localeSwitcher />
@@ -125,7 +217,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, PropType } from "vue";
 import LocaleSwitcher from "@/components/LocaleSwitcher.vue";
 
 export default defineComponent({
@@ -140,7 +232,11 @@ export default defineComponent({
   },
   props: {
     active: String,
+    environmentData: Object as PropType<EnvironmentData>,
   },
+  data: () => ({
+    today: new Date(),
+  }),
   watch: {
     locale(): void {
       this.$router.replace({
@@ -148,7 +244,7 @@ export default defineComponent({
           locale: this.locale,
         },
         query: {
-          url: this.$route.query.url,
+          url: window.location.origin,
           serverCode: this.$route.query.serverCode,
           savegame: this.$route.query.savegame,
         },
@@ -164,5 +260,40 @@ export default defineComponent({
       }
     }
   },
+  beforeUpdate() {
+    if (
+      this.environmentData &&
+      this.environmentData.dayTime &&
+      this.environmentData.daysPerPeriod &&
+      this.environmentData.currentDay &&
+      this.environmentData.weather &&
+      this.environmentData.weather.forecast
+    ) {
+      let currentMonth =
+        Math.ceil(
+          this.environmentData.currentDay / this.environmentData.daysPerPeriod
+        ) % 12;
+      let currentDay =
+        ((this.environmentData.currentDay / this.environmentData.daysPerPeriod -
+          currentMonth +
+          1) *
+          this.environmentData.daysPerPeriod) %
+        12;
+
+      this.today = new Date(
+        1999,
+        currentMonth + 1,
+        currentDay,
+        ~~(this.environmentData.dayTime / 60),
+        ~~(this.environmentData.dayTime % 60)
+      );
+    }
+  },
 });
 </script>
+
+<style scoped>
+.separated {
+  border-right: 2px solid rgba(0, 0, 0, 0.15);
+}
+</style>

@@ -1,5 +1,5 @@
 <template>
-  <navbar active="vehiclesLink" />
+  <navbar active="vehiclesLink" :environment-data="environmentData" />
   <div class="row m-1">
     <VehicleComponent :farms-data="farmsData" :vehicle-data="vehicleData" />
   </div>
@@ -8,7 +8,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import VehicleComponent from "@/components/VehicleComponent.vue";
-import dataService from "@/utils/dataService";
+import dataService from "@/services/dataService";
 import Navbar from "@/components/Navbar.vue";
 
 export default defineComponent({
@@ -17,15 +17,18 @@ export default defineComponent({
     VehicleComponent,
     navbar: Navbar,
   },
-  data: (): { vehicleData: VehicleData; farmsData: FarmsData } => ({
+  data: (): {
+    vehicleData: VehicleData;
+    farmsData: FarmsData;
+    environmentData: EnvironmentData;
+  } => ({
     vehicleData: {} as VehicleData,
-    farmsData: {
-      farm: [] as Array<Farm>,
-    } as FarmsData,
+    farmsData: {} as FarmsData,
+    environmentData: {} as EnvironmentData,
   }),
   methods: {
     queryData: async function (): Promise<void> {
-      let url = this.$route.query.url as string;
+      let url = window.location.origin as string;
       let serverCode = this.$route.query.serverCode as string;
       let savegame = this.$route.query.savegame as string;
       this.vehicleData = await dataService.getVehicleData(
@@ -34,6 +37,10 @@ export default defineComponent({
         savegame
       );
       this.farmsData = await dataService.getFarmsData(url, savegame);
+      this.environmentData = await dataService.getEnvironmentData(
+        url,
+        savegame
+      );
     },
   },
   async created(): Promise<void> {

@@ -1,5 +1,5 @@
 <template>
-  <navbar active="storageLink" />
+  <navbar active="storageLink" :environment-data="environmentData" />
   <div class="row m-1">
     <StorageComponent
       :farms-data="farmsData"
@@ -11,7 +11,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import StorageComponent from "@/components/StorageComponent.vue";
-import dataService from "@/utils/dataService";
+import dataService from "@/services/dataService";
 import Navbar from "@/components/Navbar.vue";
 
 export default defineComponent({
@@ -20,28 +20,25 @@ export default defineComponent({
     StorageComponent,
     navbar: Navbar,
   },
-  data: (): { placeablesData: PlaceableData; farmsData: FarmsData } => ({
-    placeablesData: {
-      placeable: [
-        {
-          silo: {
-            storage: {
-              node: [] as Array<StorageNode>,
-            } as StorageObject,
-          } as Silo,
-        } as Placeable,
-      ],
-    } as PlaceableData,
-    farmsData: {
-      farm: [] as Array<Farm>,
-    } as FarmsData,
+  data: (): {
+    placeablesData: PlaceableData;
+    farmsData: FarmsData;
+    environmentData: EnvironmentData;
+  } => ({
+    placeablesData: {} as PlaceableData,
+    farmsData: {} as FarmsData,
+    environmentData: {} as EnvironmentData,
   }),
   methods: {
     queryData: async function (): Promise<void> {
-      let url = this.$route.query.url as string;
+      let url = window.location.origin as string;
       let savegame = this.$route.query.savegame as string;
       this.placeablesData = await dataService.getPlaceablesData(url, savegame);
       this.farmsData = await dataService.getFarmsData(url, savegame);
+      this.environmentData = await dataService.getEnvironmentData(
+        url,
+        savegame
+      );
     },
   },
   async created(): Promise<void> {

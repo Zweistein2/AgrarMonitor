@@ -92,10 +92,10 @@ type FillTypeWrapper = {
 type FillType = {
   fillType: string | undefined;
   totalAmount: number | undefined;
-  history: History | undefined;
+  history: PeriodHistory | undefined;
 };
 
-type History = {
+type PeriodHistory = {
   period: Array<Period>;
 };
 
@@ -262,6 +262,15 @@ type VehicleDetails = {
   ridgeMarker: VehicleRidgeMarker | undefined;
   sowingMachine: VehicleSowingMachine | undefined;
   baleLoader: VehicleBaleLoader | undefined;
+  mixerWagon: VehicleMixerWagon | undefined;
+};
+
+type VehicleMixerWagon = {
+  fillType: Array<VehicleMixerFillType>;
+};
+
+type VehicleMixerFillType = {
+  fillLevel: string | undefined;
 };
 
 type VehicleBaleLoader = {
@@ -426,7 +435,7 @@ type VehicleWheels = {
 };
 
 type VehicleComponent = {
-  index: string | undefined;
+  index: number | undefined;
   position: string | undefined;
   rotation: string | undefined;
 };
@@ -483,16 +492,12 @@ type RailroadVehicle = {
 
 type ProductionPoint = {
   production: Array<Production>;
-  storage: ProductionStorage | undefined;
+  storage: StorageObject | undefined;
 };
 
 type Production = {
   id: string | undefined;
   isEnabled: boolean | undefined;
-};
-
-type ProductionStorage = {
-  farmId: number | undefined;
 };
 
 type BunkerSilo = {
@@ -709,6 +714,7 @@ type Mission = {
   field: MissionField | undefined;
   bale: MissionBale | undefined;
   harvest: MissionHarvest | undefined;
+  delivery: MissionDelivery | undefined;
 };
 
 type MissionField = {
@@ -740,4 +746,16 @@ type MissionHarvest = {
   unloadingStationIndex: number | undefined;
   expectedLiters: number | undefined;
   depositedLiters: number | undefined;
+};
+
+type MissionDelivery = {
+  sellPointPlaceableId: number | undefined;
+  unloadingStationIndex: number | undefined;
+  pricePerLitre: number | undefined;
+  expectedLiters: number | undefined;
+  contractDay: number | undefined;
+  contractTime: number | undefined;
+  contractDuration: number | undefined;
+  npcIndex: number | undefined;
+  fillType: string | undefined;
 };

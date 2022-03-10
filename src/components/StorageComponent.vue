@@ -1,64 +1,47 @@
 <template>
-  <div class="accordion accordion-flush" id="storageAccordion">
-    <div
-      class="accordion-item"
-      v-for="farm in farmsData.farm"
-      :key="farm.farmId"
-    >
-      <h2 class="accordion-header" :id="'heading' + farm.farmId">
-        <button
-          class="accordion-button collapsed"
-          type="button"
-          data-bs-toggle="collapse"
-          :data-bs-target="'#farm' + farm.farmId"
-          aria-expanded="false"
-          :aria-controls="'farm' + farm.farmId"
-        >
-          {{ farm.name }}
-        </button>
-      </h2>
+  <div
+    class="accordion accordion-flush"
+    id="storageAccordion"
+    v-if="farmsData !== undefined"
+  >
+    <template v-for="farm in farmsData.farm" :key="farm.farmId">
       <div
-        :id="'farm' + farm.farmId"
-        class="accordion-collapse collapse"
-        :aria-labelledby="'heading' + farm.farmId"
+        class="accordion-item"
+        v-if="storageFillStatesPerFarm.get(farm.farmId) !== undefined"
       >
-        <div class="accordion-body pt-0 pb-0">
-          <div
-            class="accordion accordion-flush"
-            :id="'storageSubAccordion' + farm.farmId"
+        <h2 class="accordion-header" :id="'heading' + farm.farmId">
+          <button
+            class="accordion-button collapsed"
+            type="button"
+            data-bs-toggle="collapse"
+            :data-bs-target="'#farm' + farm.farmId"
+            aria-expanded="false"
+            :aria-controls="'farm' + farm.farmId"
           >
+            {{ farm.name }}
+          </button>
+        </h2>
+        <div
+          :id="'farm' + farm.farmId"
+          class="accordion-collapse collapse"
+          :aria-labelledby="'heading' + farm.farmId"
+        >
+          <div class="accordion-body pt-0 pb-0">
             <div
-              class="accordion-item"
-              v-for="(
-                fillStatesPerPlaceable, index
-              ) in storageFillStatesPerFarm.get(farm.farmId)"
-              :key="index"
+              class="accordion accordion-flush"
+              :id="'storageSubAccordion' + farm.farmId"
             >
-              <h2
-                class="accordion-header"
-                :id="
-                  'subheading' +
-                  fillStatesPerPlaceable[0].replaceAll(/[^a-zA-Z0-9]/g, '') +
-                  '_' +
-                  index +
-                  'farm' +
-                  farm.farmId
-                "
+              <div
+                class="accordion-item"
+                v-for="(
+                  fillStatesPerPlaceable, index
+                ) in storageFillStatesPerFarm.get(farm.farmId)"
+                :key="index"
               >
-                <button
-                  class="accordion-button collapsed"
-                  type="button"
-                  data-bs-toggle="collapse"
-                  :data-bs-target="
-                    '#' +
-                    fillStatesPerPlaceable[0].replaceAll(/[^a-zA-Z0-9]/g, '') +
-                    '_' +
-                    index +
-                    'farm' +
-                    farm.farmId
-                  "
-                  aria-expanded="false"
-                  :aria-controls="
+                <h2
+                  class="accordion-header"
+                  :id="
+                    'subheading' +
                     fillStatesPerPlaceable[0].replaceAll(/[^a-zA-Z0-9]/g, '') +
                     '_' +
                     index +
@@ -66,82 +49,112 @@
                     farm.farmId
                   "
                 >
-                  {{ fillStatesPerPlaceable[0] }}
-                </button>
-              </h2>
-              <div
-                :id="
-                  fillStatesPerPlaceable[0].replaceAll(/[^a-zA-Z0-9]/g, '') +
-                  '_' +
-                  index +
-                  'farm' +
-                  farm.farmId
-                "
-                class="accordion-collapse collapse"
-                :aria-labelledby="
-                  'subheading' +
-                  fillStatesPerPlaceable[0].replaceAll(/[^a-zA-Z0-9]/g, '') +
-                  '_' +
-                  index +
-                  'farm' +
-                  farm.farmId
-                "
-              >
-                <div class="accordion-body ps-2 pt-1 pb-0">
-                  <table class="table table-borderless mb-0">
-                    <tbody>
-                      <tr
-                        :id="
-                          'content' +
-                          fillStatesPerPlaceable[0].replaceAll(
-                            /[^a-zA-Z0-9]/g,
-                            ''
-                          ) +
-                          '_' +
-                          index +
-                          'farm' +
-                          farm.farmId
-                        "
-                        v-for="fillStates in fillStatesPerPlaceable[1]"
-                        :key="fillStates[0]"
-                      >
-                        <td class="w-50" v-if="fillStates[1][1]">
-                          <img
-                            alt="IconLogo"
-                            :src="require(`@/assets/${fillStates[0]}.png`)"
-                            height="32"
-                          />
-                          {{
-                            $t(fillStates[0]) + " (" + fillStates[1][1] + ")"
-                          }}
-                        </td>
-                        <td class="w-50" v-else>
-                          <img
-                            alt="IconLogo"
-                            :src="require(`@/assets/${fillStates[0]}.png`)"
-                            height="32"
-                          />
-                          {{ $t(fillStates[0]) }}
-                        </td>
-                        <td class="w-50">
-                          {{ $n(Number.parseFloat(fillStates[1][0]), "liter") }}
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
+                  <button
+                    class="accordion-button collapsed"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    :data-bs-target="
+                      '#' +
+                      fillStatesPerPlaceable[0].replaceAll(
+                        /[^a-zA-Z0-9]/g,
+                        ''
+                      ) +
+                      '_' +
+                      index +
+                      'farm' +
+                      farm.farmId
+                    "
+                    aria-expanded="false"
+                    :aria-controls="
+                      fillStatesPerPlaceable[0].replaceAll(
+                        /[^a-zA-Z0-9]/g,
+                        ''
+                      ) +
+                      '_' +
+                      index +
+                      'farm' +
+                      farm.farmId
+                    "
+                  >
+                    {{ fillStatesPerPlaceable[0] }}
+                  </button>
+                </h2>
+                <div
+                  :id="
+                    fillStatesPerPlaceable[0].replaceAll(/[^a-zA-Z0-9]/g, '') +
+                    '_' +
+                    index +
+                    'farm' +
+                    farm.farmId
+                  "
+                  class="accordion-collapse collapse"
+                  :aria-labelledby="
+                    'subheading' +
+                    fillStatesPerPlaceable[0].replaceAll(/[^a-zA-Z0-9]/g, '') +
+                    '_' +
+                    index +
+                    'farm' +
+                    farm.farmId
+                  "
+                >
+                  <div class="accordion-body ps-2 pt-1 pb-0">
+                    <table class="table table-borderless mb-0">
+                      <tbody>
+                        <tr
+                          :id="
+                            'content' +
+                            fillStatesPerPlaceable[0].replaceAll(
+                              /[^a-zA-Z0-9]/g,
+                              ''
+                            ) +
+                            '_' +
+                            index +
+                            'farm' +
+                            farm.farmId
+                          "
+                          v-for="fillStates in fillStatesPerPlaceable[1]"
+                          :key="fillStates[0]"
+                        >
+                          <td class="w-50" v-if="fillStates[1][1]">
+                            <img
+                              alt="IconLogo"
+                              :src="iconSrc(fillStates[0])"
+                              height="32"
+                            />
+                            {{
+                              $t(fillStates[0]) + " (" + fillStates[1][1] + ")"
+                            }}
+                          </td>
+                          <td class="w-50" v-else>
+                            <img
+                              alt="IconLogo"
+                              :src="iconSrc(fillStates[0])"
+                              height="32"
+                            />
+                            {{ $t(fillStates[0]) }}
+                          </td>
+                          <td class="w-50">
+                            {{
+                              $n(Number.parseFloat(fillStates[1][0]), "liter")
+                            }}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </template>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
-import nameMappingService from "@/utils/nameMappingService";
+import nameMappingService from "@/services/nameMappingService";
 import i18n from "@/i18n";
 
 export default defineComponent({
@@ -156,6 +169,15 @@ export default defineComponent({
       Array<[string, Map<string, [number, string]>]>
     >(),
   }),
+  methods: {
+    iconSrc: function (name: string): string {
+      try {
+        return require(`@/assets/icons/${name}.png`);
+      } catch (e) {
+        return require("@/assets/icons/AIR.png");
+      }
+    },
+  },
   beforeUpdate(): void {
     this.storageFillStatesPerFarm = new Map<
       number,
@@ -165,51 +187,51 @@ export default defineComponent({
     if (this.placeablesData) {
       for (let placeable of this.placeablesData.placeable) {
         if (
-          placeable.silo &&
-          placeable.silo.storage &&
-          placeable.silo.storage.node &&
+          placeable.silo !== undefined &&
+          placeable.silo.storage !== undefined &&
+          placeable.silo.storage.node !== undefined &&
           placeable.silo.storage.node.length > 0 &&
-          placeable.farmId &&
+          placeable.farmId !== undefined &&
           placeable.farmId > 0
         ) {
-          for (let node of placeable.silo.storage.node) {
+          if (placeable.silo.storage.farmId && placeable.filename) {
             let fillStateForPlaceable = new Array<
               [string, Map<string, [number, string]>]
             >();
-            if (
-              node.fillType &&
-              node.fillLevel &&
-              placeable.silo.storage.farmId &&
-              placeable.filename
-            ) {
-              let fillStates = new Map<string, [number, string]>();
 
-              fillStates.set(node.fillType, [node.fillLevel, ""]);
-              fillStateForPlaceable.push([
-                nameMappingService.getPlaceableNameByMap(
-                  placeable.filename,
-                  "UNKNOWN"
-                ),
-                fillStates,
-              ]);
-              if (
-                this.storageFillStatesPerFarm.has(placeable.silo.storage.farmId)
-              ) {
-                let existingData = this.storageFillStatesPerFarm.get(
-                  placeable.silo.storage.farmId
-                );
+            let fillStates = new Map<string, [number, string]>();
 
-                if (existingData) {
-                  for (let fillStateForPlaceableElement of fillStateForPlaceable) {
-                    existingData.push(fillStateForPlaceableElement);
-                  }
-                }
-              } else {
-                this.storageFillStatesPerFarm.set(
-                  placeable.silo.storage.farmId,
-                  fillStateForPlaceable
-                );
+            for (let node of placeable.silo.storage.node) {
+              if (node.fillType && node.fillLevel) {
+                fillStates.set(node.fillType, [node.fillLevel, ""]);
               }
+            }
+
+            fillStateForPlaceable.push([
+              nameMappingService.getPlaceableNameByMap(
+                placeable.filename,
+                "UNKNOWN"
+              ),
+              fillStates,
+            ]);
+
+            if (
+              this.storageFillStatesPerFarm.has(placeable.silo.storage.farmId)
+            ) {
+              let existingData = this.storageFillStatesPerFarm.get(
+                placeable.silo.storage.farmId
+              );
+
+              if (existingData) {
+                for (let fillStateForPlaceableElement of fillStateForPlaceable) {
+                  existingData.push(fillStateForPlaceableElement);
+                }
+              }
+            } else {
+              this.storageFillStatesPerFarm.set(
+                placeable.silo.storage.farmId,
+                fillStateForPlaceable
+              );
             }
           }
         } else if (
@@ -229,9 +251,7 @@ export default defineComponent({
           let fermentingTimeInHours =
             placeable.bunkerSilo.fermentingTime / 60 / 60 / 1000;
           let compressionRate = 0;
-          if (
-            Number.parseFloat(placeable.bunkerSilo.fillLevel.toString()) !== 0.0
-          ) {
+          if (placeable.bunkerSilo.fillLevel !== 0.0) {
             compressionRate = Math.round(
               (placeable.bunkerSilo.compactedFillLevel /
                 placeable.bunkerSilo.fillLevel) *
@@ -284,6 +304,57 @@ export default defineComponent({
               placeable.farmId,
               fillStateForPlaceable
             );
+          }
+        } else if (
+          placeable.farmId &&
+          placeable.farmId > 0 &&
+          placeable.filename &&
+          placeable.productionPoint &&
+          placeable.productionPoint.storage &&
+          placeable.productionPoint.storage.node &&
+          placeable.productionPoint.storage.node.length > 0
+        ) {
+          if (placeable.productionPoint.storage.farmId && placeable.filename) {
+            let fillStateForPlaceable = new Array<
+              [string, Map<string, [number, string]>]
+            >();
+
+            let fillStates = new Map<string, [number, string]>();
+
+            for (let node of placeable.productionPoint.storage.node) {
+              if (node.fillType && node.fillLevel) {
+                fillStates.set(node.fillType, [node.fillLevel, ""]);
+              }
+            }
+
+            fillStateForPlaceable.push([
+              nameMappingService.getPlaceableNameByMap(
+                placeable.filename,
+                "UNKNOWN"
+              ),
+              fillStates,
+            ]);
+
+            if (
+              this.storageFillStatesPerFarm.has(
+                placeable.productionPoint.storage.farmId
+              )
+            ) {
+              let existingData = this.storageFillStatesPerFarm.get(
+                placeable.productionPoint.storage.farmId
+              );
+
+              if (existingData) {
+                for (let fillStateForPlaceableElement of fillStateForPlaceable) {
+                  existingData.push(fillStateForPlaceableElement);
+                }
+              }
+            } else {
+              this.storageFillStatesPerFarm.set(
+                placeable.productionPoint.storage.farmId,
+                fillStateForPlaceable
+              );
+            }
           }
         }
       }
