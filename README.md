@@ -1,29 +1,30 @@
-# test
+# ArgarMonitor
 
-## Project setup
-```
-npm install
-```
+[![Übersetzungsstatus](https://weblate.potionlabs.de/widgets/agrarmonitor/-/svg-badge.svg)](https://weblate.potionlabs.de/engage/agrarmonitor/)
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+ArgarMonitor is a website for showing farming simulator 22 statistics (and bragging, of course)
 
-### Compiles and minifies for production
-```
-npm run build
-```
+## Compatibility
+ArgarMonitor is compatible with the latest FS22 version
 
-### Run your unit tests
-```
-npm run test:unit
-```
+I try to keep up to date with new versions of FS22, but please don't hesitate to open an issue in case you notice something is wrong!
 
-### Lints and fixes files
-```
-npm run lint
-```
+## Usage
+TODO
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+## Configuration
+TODO
+
+## Contributing
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+
+Please make sure to update tests as appropriate.
+
+If you want to translate text (or add new languages) feel free to do so on: https://weblate.potionlabs.de/projects/agrarmonitor/
+
+Current status:
+
+[![Übersetzungsstatus](https://weblate.potionlabs.de/widgets/agrarmonitor/-/multi-auto.svg)](https://weblate.potionlabs.de/engage/agrarmonitor/)
+
+## License
+The project is licensed under the Apache License, Version 2.0. See LICENSE
