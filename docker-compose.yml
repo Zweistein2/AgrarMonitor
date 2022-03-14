@@ -1,8 +1,8 @@
 version: '2'
 
 services:
-  agrarhilfe:
-    container_name: AgrarHilfe
+  agrarmonitor:
+    container_name: AgrarMonitor
     ports:
       - 10123:8080
     build:

@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<sales>
+    <item timeLeft="14" isGenerated="true" xmlFilename="data/vehicles/newHolland/c232/c232.xml" age="8" price="28881" damage="0.215895" wear="0.865063" operatingTime="16591.574219"/>
+    <item timeLeft="7" isGenerated="true" xmlFilename="data/vehicles/newHolland/braud9070L/braud9070L.xml" age="7" price="153994" damage="0.214734" wear="0.533706" operatingTime="23198.335938"/>
+    <item timeLeft="13" isGenerated="true" xmlFilename="data/vehicles/seppKnusel/f240/f240.xml" age="21" price="4918" damage="0.300583" wear="0.981553" operatingTime="85597.289062"/>
+    <item timeLeft="2" isGenerated="true" xmlFilename="data/vehicles/heizomat/hm8400KLC/hm8400KLC.xml" age="27" price="88186" damage="0.333363" wear="0.207217" operatingTime="111224.156250"/>
+    <item timeLeft="28" isGenerated="true" xmlFilename="data/vehicles/sip/air300FAlp/air300FAlp.xml" age="13" price="9064" damage="0.207480" wear="0.327179" operatingTime="24323.367188"/>
+</sales>
