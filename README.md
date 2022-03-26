@@ -6,7 +6,10 @@
 
 #### Deutsch
 
-AgrarMonitor ist eine Website um sich seine LS22-Statistiken anzeigen zu lassen (und natürlich zum Angeben)
+### Was ist der AgrarMonitor?
+Der AgrarMonitor ist eine lokal gehostete Website, die dir alle Infos und Statistiken zu deinen LS22-Spielständen anzeigen kann. Du siehst dort beispielsweise den aktuellen Wetterbericht, was du im Lager, bzw. deinen Maschinen hast und wie sich die Marktpreise für deine Früchte verändern.
+
+Screenshots gibts im Ordner "screenshots"
 
 ## Kompatibilität
 AgrarMonitor ist kompatibel mit der aktuellsten LS22-Version
@@ -56,7 +59,10 @@ Das Projekt wird unter der Apache Lizenz, Version 2.0 lizensiert. Siehe dazu auc
 
 #### English
 
-AgrarMonitor is a website for showing farming simulator 22 statistics (and bragging, of course)
+### What is the AgrarMonitor?
+The AgrarMonitor is a locally hosted website that can show you all the information and statistics about your LS22 savegames. For example, you can see the current weather report, what you have in stock or in your machines and how the market prices for your fruits are changing.
+
+screenshots can be found in the "screenshots" folder
 
 ## Compatibility
 AgrarMonitor is compatible with the latest FS22 version
