@@ -1,0 +1,19 @@
+{
+  "TRITICALE": "Triticale",
+  "RYE": "Rye",
+  "SPELT": "Spelt",
+  "MILLET": "Millet",
+  "DIRT": "Dirt",
+  "SAND": "Sand",
+  "GRAVEL": "Gravel",
+  "ALFALFA": "Alfalfa",
+  "CARROT": "Carrot",
+  "ONION": "Onion",
+  "HOPS": "Hops",
+  "CABBAGE": "Cabbage",
+  "LAVENDER": "Lavender",
+  "EMPTYPALLET": "Palett (Empty)",
+  "OSBPALLET": "Palett (OSB board)",
+  "SPANPALLET": "Palett (Chipboard)",
+  "NFMarsch": "North frisian march"
+}

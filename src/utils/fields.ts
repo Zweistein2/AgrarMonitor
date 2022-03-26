@@ -1,5 +1,7 @@
 /* eslint-disable */
 // template: [mapname, [fieldId, [[x, y, z], size]]]
+import nfMarschFieldsMap from "@/mods/FS22_NF_Marsch_4fach_oG/utils/fields";
+
 const fieldsMap = new Map<string, Map<number, [[number, number, number], number]>>([
   ["Erlengrat", new Map<number, [[number, number, number], number]>([
       [1, [[-396.124, 10.28, -963.583], 1.76]],
@@ -165,6 +167,7 @@ const fieldsMap = new Map<string, Map<number, [[number, number, number], number]
       [48, [[733.758, 62.4373, 899.417], 3.21]],
     ]),
   ],
+  ...nfMarschFieldsMap
 ]);
 
 export default fieldsMap;

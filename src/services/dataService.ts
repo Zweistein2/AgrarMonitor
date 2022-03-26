@@ -3,6 +3,10 @@ import { XMLParser } from "fast-xml-parser";
 
 class DataService {
   getServerData(url: string) {
+    if (process.env.NODE_ENV === "development") {
+      url = "http://localhost:8100";
+    }
+
     return axios
       .get("$url/feed/dedicated-server-stats".replace("$url", url))
       .then((response) => {
@@ -23,6 +27,10 @@ class DataService {
       });
   }
   getVehicleData(url: string, serverCode: string, savegame: string) {
+    if (process.env.NODE_ENV === "development") {
+      url = "http://localhost:8100";
+    }
+
     return axios
       .get(
         "$url/feed/$savegame/vehicles"
@@ -64,6 +72,10 @@ class DataService {
       });
   }
   getEconomyData(url: string, serverCode: string, savegame: string) {
+    if (process.env.NODE_ENV === "development") {
+      url = "http://localhost:8100";
+    }
+
     return axios
       .get(
         "$url/feed/$savegame/economy"
@@ -94,6 +106,10 @@ class DataService {
       });
   }
   getMetaData(url: string, serverCode: string, savegame: string) {
+    if (process.env.NODE_ENV === "development") {
+      url = "http://localhost:8100";
+    }
+
     return axios
       .get(
         "$url/feed/$savegame/careerSavegame"
@@ -119,6 +135,10 @@ class DataService {
       });
   }
   getEnvironmentData(url: string, savegame: string) {
+    if (process.env.NODE_ENV === "development") {
+      url = "http://localhost:8100";
+    }
+
     return axios
       .get(
         "$url/feed/$savegame/environment"
@@ -147,6 +167,10 @@ class DataService {
       });
   }
   getPlaceablesData(url: string, savegame: string) {
+    if (process.env.NODE_ENV === "development") {
+      url = "http://localhost:8100";
+    }
+
     return axios
       .get(
         "$url/feed/$savegame/placeables"
@@ -181,6 +205,10 @@ class DataService {
       });
   }
   getFarmsData(url: string, savegame: string) {
+    if (process.env.NODE_ENV === "development") {
+      url = "http://localhost:8100";
+    }
+
     return axios
       .get(
         "$url/feed/$savegame/farms"
@@ -213,6 +241,10 @@ class DataService {
       });
   }
   getSalesData(url: string, savegame: string) {
+    if (process.env.NODE_ENV === "development") {
+      url = "http://localhost:8100";
+    }
+
     return axios
       .get(
         "$url/feed/$savegame/sales"
@@ -239,6 +271,10 @@ class DataService {
       });
   }
   getMissionsData(url: string, savegame: string) {
+    if (process.env.NODE_ENV === "development") {
+      url = "http://localhost:8100";
+    }
+
     return axios
       .get(
         "$url/feed/$savegame/missions"

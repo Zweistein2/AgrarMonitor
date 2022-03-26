@@ -4,7 +4,7 @@ module.exports = {
     i18n: {
       locale: "de",
       fallbackLocale: "en",
-      localeDir: "locales",
+      localeDir: "",
       enableLegacy: false,
       runtimeOnly: false,
       compositionOnly: false,

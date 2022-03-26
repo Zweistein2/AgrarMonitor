@@ -32,6 +32,9 @@ export default defineComponent({
     erlengratMap() {
       return require("@/assets/erlengrat.jpg");
     },
+    nfmarschMap() {
+      return require("@/mods/FS22_NF_Marsch_4fach_oG/assets/nfmarsch.png");
+    },
     marker() {
       return require("@/assets/marker-icon.png");
     },
@@ -147,31 +150,36 @@ export default defineComponent({
       }
     },
     addFieldMarkers: function (fieldIcon: L.Icon) {
-      let fieldsForMap = fieldsMap.get(this.selectedMapName);
+      if (fieldsMap.has(this.selectedMapName)) {
+        let fieldsForMap = fieldsMap.get(this.selectedMapName);
 
-      if (fieldsForMap) {
-        for (let field of fieldsForMap) {
-          let fieldId = field[0];
-          let fieldData = field[1];
+        if (fieldsForMap) {
+          for (let field of fieldsForMap) {
+            let fieldId = field[0];
+            let fieldData = field[1];
 
-          if (fieldData) {
-            let z = fieldData[0][2];
-            let x = fieldData[0][0];
-            let hectares = fieldData[1];
+            if (fieldData) {
+              let z = fieldData[0][2];
+              let x = fieldData[0][0];
+              let hectares = fieldData[1];
 
-            this.map.addLayer(
-              L.marker(L.latLng(z * this.mapFactor * -1, x * this.mapFactor), {
-                icon: fieldIcon,
-                title: fieldId.toString(),
-              })
-                .bindTooltip(
-                  fieldId.toString() +
-                    " (" +
-                    i18n.global.n(hectares, "hectare") +
-                    ")"
+              this.map.addLayer(
+                L.marker(
+                  L.latLng(z * this.mapFactor * -1, x * this.mapFactor),
+                  {
+                    icon: fieldIcon,
+                    title: fieldId.toString(),
+                  }
                 )
-                .on("click", this.markerClicked)
-            );
+                  .bindTooltip(
+                    fieldId.toString() +
+                      " (" +
+                      i18n.global.n(hectares, "hectare") +
+                      ")"
+                  )
+                  .on("click", this.markerClicked)
+              );
+            }
           }
         }
       }
@@ -230,8 +238,18 @@ export default defineComponent({
         minZoom: -1,
         zoom: 0,
         maxZoom: 2,
+        zoomControl: false,
       });
-      this.map.addControl(L.control.fullscreen({}));
+      this.map.addControl(
+        L.control.fullscreen({
+          position: "topright",
+        })
+      );
+      this.map.addControl(
+        L.control.zoom({
+          position: "topright",
+        })
+      );
 
       if (this.selectedMapName === undefined) {
         this.map.addLayer(L.imageOverlay(this.elmcreekMap, this.bounds));
@@ -239,6 +257,13 @@ export default defineComponent({
         this.map.addLayer(L.imageOverlay(this.erlengratMap, this.bounds));
       } else if (this.selectedMapName === "Haut-Beyleron") {
         this.map.addLayer(L.imageOverlay(this.hautbeyleronMap, this.bounds));
+      } else if (
+        this.selectedMapName === "NF Marsch 4fach oG" ||
+        this.selectedMapName === "NF Marsch 4fach" ||
+        this.selectedMapName === "NFMarsch"
+      ) {
+        this.mapFactor = 2048 / 5120;
+        this.map.addLayer(L.imageOverlay(this.nfmarschMap, this.bounds));
       } else {
         this.map.addLayer(L.imageOverlay(this.elmcreekMap, this.bounds));
       }
