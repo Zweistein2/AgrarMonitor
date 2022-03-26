@@ -1,6 +1,6 @@
 <template>
   <navbar active="calculatorLink" :environment-data="environmentData" />
-  <CalculationComponent :economy-data="economyData" />
+  <CalculationComponent :economy-data="economyData" :meta-data="metaData" />
 </template>
 
 <script lang="ts">
@@ -15,9 +15,14 @@ export default defineComponent({
     CalculationComponent,
     navbar: Navbar,
   },
-  data: (): { economyData: EconomyData; environmentData: EnvironmentData } => ({
+  data: (): {
+    economyData: EconomyData;
+    environmentData: EnvironmentData;
+    metaData: MetaData;
+  } => ({
     economyData: {} as EconomyData,
     environmentData: {} as EnvironmentData,
+    metaData: {} as MetaData,
   }),
   methods: {
     queryData: async function (): Promise<void> {
@@ -33,6 +38,7 @@ export default defineComponent({
         url,
         savegame
       );
+      this.metaData = await dataService.getMetaData(url, serverCode, savegame);
     },
   },
   async created(): Promise<void> {
