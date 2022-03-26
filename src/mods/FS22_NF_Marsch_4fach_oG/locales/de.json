@@ -1,0 +1,19 @@
+{
+  "TRITICALE": "Triticale",
+  "RYE": "Roggen",
+  "SPELT": "Dinkel",
+  "MILLET": "Hirse",
+  "DIRT": "Erde",
+  "SAND": "Sand",
+  "GRAVEL": "Kies",
+  "ALFALFA": "Luzerne",
+  "CARROT": "Karotte",
+  "ONION": "Zwiebel",
+  "HOPS": "Hopfen",
+  "CABBAGE": "Kohl",
+  "LAVENDER": "Lavendel",
+  "EMPTYPALLET": "Palette (Leer)",
+  "OSBPALLET": "Palette (OSB Platte)",
+  "SPANPALLET": "Palette (Spanplatte)",
+  "NFMarsch": "Nordfriesische Marsch"
+}

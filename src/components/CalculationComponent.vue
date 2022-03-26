@@ -4,18 +4,31 @@
       <div class="card">
         <div class="card-header">
           <h5 class="card-title">
-            {{ $t("map") + " - " + selectedMap }}
+            {{ $t("map") + " - " + $t(selectedMap) }}
           </h5>
         </div>
         <div class="card-body">
           <div class="row">
             <v-select
+              v-if="isNFMarschInstalled"
+              v-model="selectedMap"
+              :clearable="false"
+              :options="['Elmcreek', 'Erlengrat', 'Haut-Beyleron', 'NFMarsch']"
+              :get-option-label="(map) => `${$t(map)}`"
+            >
+              <template v-slot:option="map">
+                {{ $t(map.label) }}
+              </template>
+            </v-select>
+            <v-select
+              v-else
               v-model="selectedMap"
               :clearable="false"
               :options="['Elmcreek', 'Erlengrat', 'Haut-Beyleron']"
+              :get-option-label="(map) => `${$t(map)}`"
             >
               <template v-slot:option="map">
-                {{ map.label }}
+                {{ $t(map.label) }}
               </template>
             </v-select>
             <mapComponent
@@ -1065,6 +1078,8 @@ import fruityieldsMap from "@/utils/fruityields";
 import fieldsMap from "@/utils/fields";
 import Masonry from "masonry-layout";
 import Chart, { ChartItem } from "chart.js/auto";
+import nfFruittypesMap from "@/mods/FS22_NF_Marsch_4fach_oG/utils/fruittypes";
+import nfFruityieldsMap from "@/mods/FS22_NF_Marsch_4fach_oG/utils/fruityields";
 
 export default defineComponent({
   name: "CalculationComponent",
@@ -1074,6 +1089,7 @@ export default defineComponent({
   },
   props: {
     economyData: Object as PropType<EconomyData>,
+    metaData: Object as PropType<MetaData>,
   },
   data: () => ({
     selectedFruitType: "WHEAT" as string,
@@ -1104,6 +1120,7 @@ export default defineComponent({
   watch: {
     selectedMap: function () {
       this.selectedField = 1;
+      this.selectedFruitType = "WHEAT";
     },
     selectedFruitType: function () {
       this.updateMasonry();
@@ -1332,10 +1349,23 @@ export default defineComponent({
     }
   },
   computed: {
+    isNFMarschInstalled: function () {
+      if (this.metaData !== undefined && this.metaData.mod !== undefined) {
+        return (
+          this.metaData.mod.filter(
+            (value) =>
+              value.modName === "FS22_NF_Marsch_4fach_oG" ||
+              value.modName === "FS22_NF_Marsch_4fach"
+          ).length === 1
+        );
+      } else {
+        return false;
+      }
+    },
     fruittypeNames() {
       let fruittypeNames = new Array<string>();
 
-      for (let fruittype of fruittypesMap) {
+      for (let fruittype of this.fruittypes) {
         if (
           ![
             "SUGARCANE_SEEDS",
@@ -1366,9 +1396,17 @@ export default defineComponent({
       return fruittypeNames;
     },
     fruityields() {
+      if (this.isNFMarschInstalled && this.selectedMap === "NFMarsch") {
+        return new Map([...fruityieldsMap, ...nfFruityieldsMap]);
+      }
+
       return fruityieldsMap;
     },
     fruittypes() {
+      if (this.isNFMarschInstalled && this.selectedMap === "NFMarsch") {
+        return new Map([...fruittypesMap, ...nfFruittypesMap]);
+      }
+
       return fruittypesMap;
     },
     fields() {
