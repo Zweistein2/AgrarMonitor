@@ -241,8 +241,8 @@ export default defineComponent({
       } as ChartData<"line", number[]>;
 
       for (let farm of this.farmsData.farm) {
-        if (farm.farmId && farm.name) {
-          let farmColorData = farmsMap.get(farm.farmId);
+        if (farm.farmId && farm.name && farm.color) {
+          let farmColorData = farmsMap.get(farm.color);
 
           if (farmColorData && farm.finances && farm.finances.stats) {
             let labelDataMap = new Map<string, number>();

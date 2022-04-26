@@ -1,11 +1,7 @@
 <template>
-  <navbar active="statisticsLink" :environment-data="environmentData" />
+  <navbar active="farmsLink" :environment-data="environmentData" />
   <div class="row m-1">
-    <StatisticComponent
-      :farms-data="farmsData"
-      :placeables-data="placeablesData"
-      :economy-data="economyData"
-    />
+    <FarmsComponent :farms-data="farmsData" />
   </div>
 </template>
 
@@ -13,36 +9,39 @@
 import { defineComponent } from "vue";
 import dataService from "@/services/dataService";
 import Navbar from "@/components/Navbar.vue";
-import StatisticComponent from "@/components/StatisticComponent.vue";
+import FarmsComponent from "@/components/FarmsComponent.vue";
 
 export default defineComponent({
-  name: "StatisticView",
+  name: "FarmsView",
   components: {
-    StatisticComponent,
+    FarmsComponent,
     navbar: Navbar,
   },
-  data: (): {
-    farmsData: FarmsData;
-    placeablesData: PlaceableData;
-    environmentData: EnvironmentData;
-    economyData: EconomyData;
-  } => ({
+  data: (): { farmsData: FarmsData; environmentData: EnvironmentData } => ({
     farmsData: {} as FarmsData,
-    placeablesData: {} as PlaceableData,
     environmentData: {} as EnvironmentData,
-    economyData: {} as EconomyData,
   }),
   methods: {
     queryData: async function (): Promise<void> {
       let url = window.location.origin as string;
       let savegame = this.$route.query.savegame as string;
-      this.farmsData = await dataService.getFarmsData(url, savegame);
-      this.placeablesData = await dataService.getPlaceablesData(url, savegame);
+      let farmsDataRaw = (await dataService.getFarmsData(
+        url,
+        savegame
+      )) as FarmsData;
+
+      for (let farm of farmsDataRaw.farm) {
+        if (farm.contracting === undefined) {
+          farm.contracting = {} as FarmContracts;
+          farm.contracting.farm = Array<FarmContract>();
+        }
+      }
+
+      this.farmsData = farmsDataRaw;
       this.environmentData = await dataService.getEnvironmentData(
         url,
         savegame
       );
-      this.economyData = await dataService.getEconomyData(url, savegame);
     },
   },
   async created(): Promise<void> {

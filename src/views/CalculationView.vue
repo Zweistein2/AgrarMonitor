@@ -28,17 +28,12 @@ export default defineComponent({
     queryData: async function (): Promise<void> {
       let url = window.location.origin as string;
       let savegame = this.$route.query.savegame as string;
-      let serverCode = this.$route.query.serverCode as string;
-      this.economyData = await dataService.getEconomyData(
-        url,
-        serverCode,
-        savegame
-      );
+      this.economyData = await dataService.getEconomyData(url, savegame);
       this.environmentData = await dataService.getEnvironmentData(
         url,
         savegame
       );
-      this.metaData = await dataService.getMetaData(url, serverCode, savegame);
+      this.metaData = await dataService.getMetaData(url, savegame);
     },
   },
   async created(): Promise<void> {

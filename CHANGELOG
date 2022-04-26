@@ -1,12 +1,18 @@
 [1.0.1]
 ...In development...
 Done:
-Planned:
+- Live updates of vehicles, players
+- Show farms and players (and their permissions)
 - Ability to select savegame directly on the website
-- Show farms and players
+- Added Dutch as language (Thanks to @SupremeClicker!)
+Planned:
+- Live updates of missions, weather and storage
 - Show max fill level on greenhouses
 - Categorize buildings under "storage"
 - Tests!
+
+Known bugs:
+- If a vehicle is bought or reset, then the live updates stop working/show incorrect data until the game is saved again
 
 [1.0.0]
 - Initial Release

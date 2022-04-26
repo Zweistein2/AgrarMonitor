@@ -1,6 +1,7 @@
 import placeableMap from "@/utils/placeables";
 import vehicleMap from "@/utils/vehicles";
 import i18n from "../i18n";
+import fruittypesMap from "@/utils/fruittypes";
 
 class NameMappingService {
   getPlaceableNameByMap(
@@ -71,6 +72,21 @@ class NameMappingService {
 
       if (vehicleMapData && vehicleMapData[0]) {
         return vehicleMapData[0];
+      }
+    }
+
+    return defaultValue;
+  }
+
+  getFillUnitNameByMap(
+    fillUnitId: number | undefined,
+    defaultValue: string
+  ): string {
+    if (fillUnitId !== undefined) {
+      for (const fruittype of fruittypesMap) {
+        if (fruittype[1][2] === fillUnitId) {
+          return fruittype[0];
+        }
       }
     }
 

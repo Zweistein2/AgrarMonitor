@@ -46,6 +46,7 @@ Aktuell unterstützt werden die folgenden Mods:
 
 ## Zukünftige Updates
 Für die Zukunft sind die folgenden größeren Updates geplant:
+- Autodrive/Courseplay-Support: Damit du online deine Tracks sehen und evtl. bearbeiten kannst
 - Echtzeit-Updates: Damit kannst du live zuschauen, wie sich die Zahlen und Daten ändern und Fahrzeuge bewegen
 - Server-Unterstützung: Damit du auch sehen kannst, was deine Freunde machen
 - Mod-Support: Du darfst gerne Mods vorschlagen (am Besten ein Issue dazu eröffnen), ich werde versuchen diese zu unterstützen

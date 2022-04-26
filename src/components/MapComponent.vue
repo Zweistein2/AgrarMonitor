@@ -11,13 +11,15 @@ import nameMappingService from "@/services/nameMappingService";
 import "@runette/leaflet-fullscreen";
 import fieldsMap from "@/utils/fields";
 import i18n from "@/i18n";
+import farmsMap from "@/utils/farms";
+import { toRaw } from "vue";
 
 export default defineComponent({
   name: "MapComponent",
   props: {
-    vehicleData: Object as PropType<VehicleData>,
-    serverData: Object as PropType<ServerData>,
-    metaData: Object as PropType<MetaData>,
+    vehicleDataProp: Object as PropType<VehicleData>,
+    metaDataProp: Object as PropType<MetaData>,
+    farmsDataProp: Object as PropType<FarmsData>,
     mapName: String,
     showVehicles: Boolean,
     showFields: Boolean,
@@ -35,27 +37,6 @@ export default defineComponent({
     nfmarschMap() {
       return require("@/mods/FS22_NF_Marsch_4fach_oG/assets/nfmarsch.png");
     },
-    marker() {
-      return require("@/assets/marker-icon.png");
-    },
-    marker2x() {
-      return require("@/assets/marker-icon-2x.png");
-    },
-    playermarker() {
-      return require("@/assets/player-icon.png");
-    },
-    playermarker2x() {
-      return require("@/assets/player-icon-2x.png");
-    },
-    fieldmarker() {
-      return require("@/assets/field-icon.png");
-    },
-    fieldmarker2x() {
-      return require("@/assets/field-icon-2x.png");
-    },
-    markerShadow() {
-      return require("@/assets/marker-shadow.png");
-    },
   },
   data: () => ({
     selectedMapName: "Elmcreek" as string,
@@ -63,93 +44,140 @@ export default defineComponent({
     bounds: [[-1024, -1024] as L.LatLngTuple, [1024, 1024] as L.LatLngTuple],
     mapFactor: 2048 / 2560,
     map: {} as L.Map,
+    vehicleData: {} as VehicleData,
+    farmsData: {} as FarmsData,
+    metaData: {} as MetaData,
+    fontawesomeScript: {} as HTMLScriptElement,
   }),
+  watch: {
+    vehicleDataProp: {
+      handler: function (val) {
+        if (val !== undefined) {
+          this.vehicleData = val;
+
+          this.updateMarkers();
+        }
+      },
+      deep: true,
+      immediate: true,
+    },
+    metaDataProp: {
+      handler: function (val) {
+        if (val !== undefined) {
+          this.metaData = val;
+        }
+      },
+      deep: true,
+      immediate: true,
+    },
+    farmsDataProp: {
+      handler: function (val) {
+        if (val !== undefined) {
+          this.farmsData = val;
+        }
+      },
+      deep: true,
+      immediate: true,
+    },
+  },
   methods: {
-    addVehicleMarkers: function (playerIcon: L.Icon) {
-      if (this.serverData) {
-        if (this.serverData.Vehicles) {
-          for (let vehicle of this.serverData.Vehicles.Vehicle) {
+    addVehicleMarkers: function (map: L.Map) {
+      if (
+        this.vehicleData &&
+        this.vehicleData.vehicle &&
+        this.vehicleData.vehicle.length > 0
+      ) {
+        for (let vehicle of this.vehicleData.vehicle) {
+          for (let component of vehicle.component) {
             if (
-              vehicle.type !== "trainTrailer" &&
-              vehicle.type !== "trainTimberTrailer" &&
-              vehicle.type !== "bigBag" &&
-              vehicle.type !== "pallet"
+              component.index !== undefined &&
+              component.index === 1 &&
+              component.position &&
+              vehicle.filename
             ) {
-              if (vehicle.z && vehicle.x && vehicle.name) {
-                this.map.addLayer(
-                  L.marker(
-                    L.latLng(
-                      vehicle.z * this.mapFactor * -1,
-                      vehicle.x * this.mapFactor
-                    )
-                  ).bindTooltip(vehicle.name)
-                );
-              }
-            }
-          }
-        }
-        if (
-          this.serverData.Slots &&
-          this.serverData.Slots.numUsed &&
-          this.serverData.Slots.numUsed > 0
-        ) {
-          for (let player of this.serverData.Slots.Player) {
-            if (player.isUsed && player.z && player.x && player.text) {
-              this.map.addLayer(
-                L.marker(
-                  L.latLng(
-                    player.z * this.mapFactor * -1,
-                    player.x * this.mapFactor
-                  ),
-                  {
-                    icon: playerIcon,
-                  }
-                ).bindTooltip(player.text)
+              let z = Number.parseFloat(component.position.split(" ")[2]);
+              let x = Number.parseFloat(component.position.split(" ")[0]);
+              let brand = nameMappingService.getVehicleBrandByMap(
+                vehicle.filename,
+                ""
               );
-            }
-          }
-        }
-      } else {
-        if (
-          this.vehicleData &&
-          this.vehicleData.vehicle &&
-          this.vehicleData.vehicle.length > 0
-        ) {
-          for (let vehicle of this.vehicleData.vehicle) {
-            for (let component of vehicle.component) {
-              if (
-                component.index !== undefined &&
-                component.index === 1 &&
-                component.position &&
-                vehicle.filename
-              ) {
-                let z = Number.parseFloat(component.position.split(" ")[2]);
-                let x = Number.parseFloat(component.position.split(" ")[0]);
-                let brand = nameMappingService.getVehicleBrandByMap(
-                  vehicle.filename,
-                  ""
-                );
-                let name = nameMappingService.getVehicleNameByMap(
-                  vehicle.filename,
-                  "UNKNOWN"
-                );
+              let name = nameMappingService.getVehicleNameByMap(
+                vehicle.filename,
+                "UNKNOWN"
+              );
 
-                if (brand !== "") {
-                  name = brand.concat(" ").concat(name);
-                }
-
-                this.map.addLayer(
-                  L.marker(
-                    L.latLng(z * this.mapFactor * -1, x * this.mapFactor)
-                  ).bindTooltip(name)
-                );
+              if (brand !== "") {
+                name = brand.concat(" ").concat(name);
               }
+
+              let color = "#000080";
+
+              if (
+                vehicle.farmId !== undefined &&
+                this.farmsData !== undefined &&
+                this.farmsData.farm !== undefined
+              ) {
+                for (let farm of this.farmsData.farm) {
+                  if (
+                    farm.farmId === vehicle.farmId &&
+                    farm.color !== undefined
+                  ) {
+                    let farmColor = farmsMap.get(farm.color);
+
+                    if (farmColor) {
+                      color = farmColor[0];
+                    }
+                  }
+                }
+              }
+
+              let vehicleType = "trailer";
+              let vehicleCategory = nameMappingService.getVehicleTypeByMap(
+                vehicle.filename,
+                "UNKNOWN"
+              ) as string;
+
+              if (
+                vehicleCategory.includes("locomotive") ||
+                vehicleCategory.includes("train")
+              ) {
+                vehicleType = "train";
+              } else if (vehicleCategory === "car") {
+                vehicleType = "car";
+              } else if (
+                vehicleCategory.includes("tractor") ||
+                vehicleCategory.includes("Drivable") ||
+                vehicleCategory.includes("drivable")
+              ) {
+                vehicleType = "tractor";
+              } else if (vehicleCategory === "pallet") {
+                vehicleType = "pallet-boxes";
+              } else if (vehicleCategory === "UNKNOWN") {
+                vehicleType = "question";
+              }
+
+              map.addLayer(
+                L.marker(
+                  L.latLng(z * this.mapFactor * -1, x * this.mapFactor),
+                  {
+                    icon: L.divIcon({
+                      html: `<span class="fa-stack fa-2x"><i class="fa-solid fa-location-pin fa-stack-2x" style="color: ${color};"></i><i class="fa-solid fa-${vehicleType} fa-inverse fa-stack-1x fa-xs" style="margin-top: -7px;"></i></span>`,
+                      className: "defaultMarker",
+                      iconSize: [60, 48],
+                      iconAnchor: [30, 48],
+                      popupAnchor: [30, 0],
+                      tooltipAnchor: [0, -30],
+                    }),
+                    riseOnHover: true,
+                  }
+                ).bindTooltip(name)
+              );
             }
           }
         }
       }
     },
-    addFieldMarkers: function (fieldIcon: L.Icon) {
+    addFieldMarkers: function (map: L.Map) {
       if (fieldsMap.has(this.selectedMapName)) {
         let fieldsForMap = fieldsMap.get(this.selectedMapName);
 
@@ -163,11 +191,19 @@ export default defineComponent({
               let x = fieldData[0][0];
               let hectares = fieldData[1];
 
-              this.map.addLayer(
+              map.addLayer(
                 L.marker(
                   L.latLng(z * this.mapFactor * -1, x * this.mapFactor),
                   {
-                    icon: fieldIcon,
+                    icon: L.divIcon({
+                      html: `<span class="fa-stack fa-2x"><i class="fa-solid fa-location-pin fa-stack-2x"></i><i class="fa-solid fa-wheat fa-inverse fa-stack-1x fa-xs" style="margin-top: -7px;"></i></span>`,
+                      className: "fieldMarker",
+                      iconSize: [60, 48],
+                      iconAnchor: [30, 48],
+                      popupAnchor: [30, 0],
+                      tooltipAnchor: [0, -30],
+                    }),
+                    riseOnHover: true,
                     title: fieldId.toString(),
                   }
                 )
@@ -189,40 +225,35 @@ export default defineComponent({
 
       this.$emit("selectField", fieldId);
     },
-    setupLeafletMap: async function () {
-      delete L.Icon.Default.prototype[
-        "_getIconUrl" as never as keyof L.Icon.Default
-      ];
-
-      L.Icon.Default.mergeOptions({
-        iconRetinaUrl: this.marker2x,
-        iconUrl: this.marker,
-        shadowUrl: this.markerShadow,
-      });
-      const playerIcon = L.icon({
-        iconRetinaUrl: this.playermarker2x,
-        iconUrl: this.playermarker,
-        shadowUrl: this.markerShadow,
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-        tooltipAnchor: [16, -28],
-        shadowSize: [41, 41],
-      });
-      const fieldIcon = L.icon({
-        iconRetinaUrl: this.fieldmarker2x,
-        iconUrl: this.fieldmarker,
-        shadowUrl: this.markerShadow,
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-        tooltipAnchor: [16, -28],
-        shadowSize: [41, 41],
+    setupLeafletMap: function () {
+      const map = L.map("mapContainer", {
+        crs: L.CRS.Simple,
+        center: this.center,
+        minZoom: -2,
+        zoom: 0,
+        maxZoom: 4,
+        zoomControl: false,
       });
 
-      if (this.serverData && this.serverData.mapName) {
-        this.selectedMapName = this.serverData.mapName;
-      } else if (
+      this.addControlsToMap(map);
+      this.addMarkersToMap(map);
+
+      this.map = map;
+    },
+    addControlsToMap: function (map: L.Map) {
+      map.addControl(
+        L.control.fullscreen({
+          position: "topright",
+        })
+      );
+      map.addControl(
+        L.control.zoom({
+          position: "topright",
+        })
+      );
+    },
+    addMarkersToMap: function (map: L.Map) {
+      if (
         this.metaData &&
         this.metaData.settings &&
         this.metaData.settings.mapTitle
@@ -232,59 +263,84 @@ export default defineComponent({
         this.selectedMapName = this.mapName;
       }
 
-      this.map = L.map("mapContainer", {
-        crs: L.CRS.Simple,
-        center: this.center,
-        minZoom: -1,
-        zoom: 0,
-        maxZoom: 2,
-        zoomControl: false,
-      });
-      this.map.addControl(
-        L.control.fullscreen({
-          position: "topright",
-        })
-      );
-      this.map.addControl(
-        L.control.zoom({
-          position: "topright",
-        })
-      );
-
       if (this.selectedMapName === undefined) {
-        this.map.addLayer(L.imageOverlay(this.elmcreekMap, this.bounds));
+        map.addLayer(L.imageOverlay(this.elmcreekMap, this.bounds));
       } else if (this.selectedMapName === "Erlengrat") {
-        this.map.addLayer(L.imageOverlay(this.erlengratMap, this.bounds));
+        map.addLayer(L.imageOverlay(this.erlengratMap, this.bounds));
       } else if (this.selectedMapName === "Haut-Beyleron") {
-        this.map.addLayer(L.imageOverlay(this.hautbeyleronMap, this.bounds));
+        map.addLayer(L.imageOverlay(this.hautbeyleronMap, this.bounds));
       } else if (
         this.selectedMapName === "NF Marsch 4fach oG" ||
         this.selectedMapName === "NF Marsch 4fach" ||
+        this.selectedMapName === "NORTH FRISIAN MARCH 4X" ||
         this.selectedMapName === "NFMarsch"
       ) {
         this.mapFactor = 2048 / 5120;
-        this.map.addLayer(L.imageOverlay(this.nfmarschMap, this.bounds));
+        map.addLayer(L.imageOverlay(this.nfmarschMap, this.bounds));
       } else {
-        this.map.addLayer(L.imageOverlay(this.elmcreekMap, this.bounds));
+        map.addLayer(L.imageOverlay(this.elmcreekMap, this.bounds));
       }
 
       if (this.showVehicles) {
-        this.addVehicleMarkers(playerIcon);
+        this.addVehicleMarkers(map);
       }
       if (this.showFields) {
-        this.addFieldMarkers(fieldIcon);
+        this.addFieldMarkers(map);
+      }
+    },
+    updateMarkers: function () {
+      if (Object.keys(toRaw(this.map)).length > 0) {
+        let layers = Array<L.Layer>();
+
+        toRaw(this.map).eachLayer((layer) => {
+          layers.push(layer);
+        });
+
+        for (let layer of layers) {
+          toRaw(this.map).removeLayer(layer);
+        }
+
+        this.addMarkersToMap(toRaw(this.map) as L.Map);
       }
     },
   },
   mounted(): void {
-    this.setupLeafletMap();
-  },
-  updated(): void {
-    if (Object.keys(this.map).length > 0) {
-      this.map.remove();
+    if (this.fontawesomeScript.id === undefined) {
+      this.fontawesomeScript = document.createElement("script");
+      this.fontawesomeScript.setAttribute(
+        "src",
+        "https://kit.fontawesome.com/0f75b8f3da.js"
+      );
+      this.fontawesomeScript.setAttribute("id", "fontawesomeScript");
+      document.head.appendChild(this.fontawesomeScript);
     }
 
     this.setupLeafletMap();
+  },
+  unmounted(): void {
+    if (this.fontawesomeScript.id !== undefined) {
+      document.head.removeChild(this.fontawesomeScript);
+      let faVFourFontFace = document.getElementById("fa-v4-font-face");
+      let faVFiveFontFace = document.getElementById("fa-v5-font-face");
+      let faVFourShims = document.getElementById("fa-v4-shims");
+      let faMain = document.getElementById("fa-main");
+
+      if (faVFourFontFace) {
+        document.head.removeChild(faVFourFontFace);
+      }
+      if (faVFiveFontFace) {
+        document.head.removeChild(faVFiveFontFace);
+      }
+      if (faVFourShims) {
+        document.head.removeChild(faVFourShims);
+      }
+      if (faMain) {
+        document.head.removeChild(faMain);
+      }
+    }
+  },
+  updated(): void {
+    this.updateMarkers();
   },
 });
 </script>

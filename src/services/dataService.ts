@@ -2,31 +2,82 @@ import axios from "axios";
 import { XMLParser } from "fast-xml-parser";
 
 class DataService {
-  getServerData(url: string) {
-    if (process.env.NODE_ENV === "development") {
-      url = "http://localhost:8100";
+  private websocketConnection: WebSocket | undefined = undefined;
+  websocketData: WebsocketData = {} as WebsocketData;
+
+  openWebsocket(url: string) {
+    if (
+      this.websocketConnection === null ||
+      this.websocketConnection === undefined
+    ) {
+      if (process.env.NODE_ENV === "development") {
+        url = "ws://localhost:8100/plumber";
+      }
+
+      this.websocketConnection = new WebSocket(url);
+
+      this.websocketConnection.onmessage = function (event) {
+        const data = event.data as string;
+
+        if (data.startsWith('{"fields"')) {
+          dataService.websocketData.fieldData = JSON.parse(
+            data
+          ) as WebsocketFieldWrapper;
+        } else if (data.startsWith('{"players"')) {
+          dataService.websocketData.playerData = JSON.parse(
+            data
+          ) as WebsocketPlayerWrapper;
+        } else if (data.startsWith('{"farms"')) {
+          dataService.websocketData.farmData = JSON.parse(
+            data
+          ) as WebsocketFarmWrapper;
+        } else if (data.startsWith('{"metadata"')) {
+          dataService.websocketData.metadataData = JSON.parse(
+            data
+          ) as WebsocketMetadataWrapper;
+        } else if (data.startsWith('{"mods"')) {
+          dataService.websocketData.modsData = JSON.parse(
+            data
+          ) as WebsocketModsWrapper;
+        } else if (data.startsWith('{"missions"')) {
+          dataService.websocketData.missionsData = JSON.parse(
+            data
+          ) as WebsocketMissionsWrapper;
+        } else if (data.startsWith('{"economy"')) {
+          dataService.websocketData.economyData = JSON.parse(
+            data
+          ) as WebsocketEconomyWrapper;
+        } else if (data.startsWith('{"vehicleSales"')) {
+          dataService.websocketData.vehicleSalesData = JSON.parse(
+            data
+          ) as WebsocketVehicleSalesWrapper;
+        } else if (data.startsWith('{"vehicles"')) {
+          dataService.websocketData.vehiclesData = JSON.parse(
+            data
+          ) as WebsocketVehiclesWrapper;
+        } else if (data.startsWith('{"npcs"')) {
+          dataService.websocketData.npcsData = JSON.parse(
+            data
+          ) as WebsocketNPCsWrapper;
+        } else if (data.startsWith('{"time"')) {
+          dataService.websocketData.timeData = JSON.parse(
+            data
+          ) as WebsocketTime;
+        } else {
+          console.warn("Unknown data sent on websocket: ", data);
+        }
+      };
     }
-
-    return axios
-      .get("$url/feed/dedicated-server-stats".replace("$url", url))
-      .then((response) => {
-        console.warn(response.status);
-
-        const options = {
-          ignoreAttributes: false,
-          attributeNamePrefix: "",
-          textNodeName: "text",
-          parseAttributeValue: true,
-          parseTagValue: true,
-        };
-        const parser = new XMLParser(options);
-        return parser.parse(response.data).Server;
-      })
-      .catch(() => {
-        return undefined;
-      });
   }
-  getVehicleData(url: string, serverCode: string, savegame: string) {
+  getWebsocketData() {
+    if (
+      this.websocketConnection !== null &&
+      this.websocketConnection !== undefined
+    ) {
+      this.websocketConnection.send("requesting Data");
+    }
+  }
+  getVehicleData(url: string, savegame: string) {
     if (process.env.NODE_ENV === "development") {
       url = "http://localhost:8100";
     }
@@ -71,7 +122,7 @@ class DataService {
         return undefined;
       });
   }
-  getEconomyData(url: string, serverCode: string, savegame: string) {
+  getEconomyData(url: string, savegame: string) {
     if (process.env.NODE_ENV === "development") {
       url = "http://localhost:8100";
     }
@@ -105,7 +156,7 @@ class DataService {
         return undefined;
       });
   }
-  getMetaData(url: string, serverCode: string, savegame: string) {
+  getMetaData(url: string, savegame: string) {
     if (process.env.NODE_ENV === "development") {
       url = "http://localhost:8100";
     }
@@ -229,6 +280,7 @@ class DataService {
                 "farms.farm",
                 "farms.farm.players.player",
                 "farms.farm.finances.stats",
+                "farms.farm.contracting.farm",
               ].indexOf(jpath) !== -1
             );
           },

@@ -12,7 +12,6 @@
               locale: this.$i18n.locale,
             },
             query: {
-              serverCode: this.$route.query.serverCode,
               savegame: this.$route.query.savegame,
             },
           }"
@@ -43,7 +42,6 @@
                   locale: this.$i18n.locale,
                 },
                 query: {
-                  serverCode: this.$route.query.serverCode,
                   savegame: this.$route.query.savegame,
                 },
               }"
@@ -61,7 +59,6 @@
                   locale: this.$i18n.locale,
                 },
                 query: {
-                  serverCode: this.$route.query.serverCode,
                   savegame: this.$route.query.savegame,
                 },
               }"
@@ -79,7 +76,6 @@
                   locale: this.$i18n.locale,
                 },
                 query: {
-                  serverCode: this.$route.query.serverCode,
                   savegame: this.$route.query.savegame,
                 },
               }"
@@ -161,6 +157,24 @@
           </li>
           <li class="nav-item">
             <router-link
+              class="nav-link"
+              id="farmsLink"
+              :to="{
+                name: 'Farms',
+                params: {
+                  locale: this.$i18n.locale,
+                },
+                query: {
+                  serverCode: this.$route.query.serverCode,
+                  savegame: this.$route.query.savegame,
+                },
+              }"
+            >
+              {{ $t("farms") }}
+            </router-link>
+          </li>
+          <li class="nav-item">
+            <router-link
               class="nav-link disabled"
               id="productionsLink"
               :to="{
@@ -209,6 +223,9 @@
         {{ $d(today, "date") }} -
         {{ $d(today, "time") }}
       </div>
+      <div class="mb-2 mb-lg-0 me-2 pe-2 separated">
+        <savegameSwitcher />
+      </div>
       <div class="mb-2 mb-lg-0">
         <localeSwitcher />
       </div>
@@ -219,11 +236,13 @@
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
 import LocaleSwitcher from "@/components/LocaleSwitcher.vue";
+import SavegameSwitcher from "@/components/SavegameSwitcher.vue";
 
 export default defineComponent({
   name: "Navbar",
   components: {
     localeSwitcher: LocaleSwitcher,
+    SavegameSwitcher: SavegameSwitcher,
   },
   computed: {
     locale() {

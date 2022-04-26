@@ -1116,6 +1116,7 @@ export default defineComponent({
       "difficulty_3",
     ] as Array<string>,
     masonry: {} as Masonry,
+    masonryScript: {} as HTMLScriptElement,
   }),
   watch: {
     selectedMap: function () {
@@ -1144,7 +1145,7 @@ export default defineComponent({
       let fruittype = this.fruittypes.get(this.selectedFruitType);
       if (fruittype) {
         let price = fruittype[1];
-        let priceFaktorPerMonth = fruittype[2];
+        let priceFaktorPerMonth = fruittype[3];
 
         return (
           price * 1000 * this.difficultyFactor * priceFaktorPerMonth[month]
@@ -1261,17 +1262,25 @@ export default defineComponent({
     },
   },
   mounted(): void {
-    let masonryScript = document.createElement("script");
-    masonryScript.setAttribute(
-      "src",
-      "https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"
-    );
-    document.head.appendChild(masonryScript);
+    if (this.masonryScript.id === undefined) {
+      this.masonryScript = document.createElement("script");
+      this.masonryScript.setAttribute(
+        "src",
+        "https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"
+      );
+      this.masonryScript.setAttribute("id", "masonryScript");
+      document.head.appendChild(this.masonryScript);
+    }
 
     let row = document.querySelector("#masonry") as Element;
     this.masonry = new Masonry(row, {
       percentPosition: true,
     });
+  },
+  unmounted(): void {
+    if (this.masonryScript.id !== undefined) {
+      document.head.removeChild(this.masonryScript);
+    }
   },
   updated(): void {
     this.updateMasonry();

@@ -29,13 +29,8 @@ export default defineComponent({
   methods: {
     queryData: async function (): Promise<void> {
       let url = window.location.origin as string;
-      let serverCode = this.$route.query.serverCode as string;
       let savegame = this.$route.query.savegame as string;
-      this.vehicleData = await dataService.getVehicleData(
-        url,
-        serverCode,
-        savegame
-      );
+      this.vehicleData = await dataService.getVehicleData(url, savegame);
       this.farmsData = await dataService.getFarmsData(url, savegame);
       this.environmentData = await dataService.getEnvironmentData(
         url,

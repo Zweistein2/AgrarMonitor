@@ -5,9 +5,9 @@
         <div class="card-header">{{ $t("map") }}</div>
         <div class="card-body">
           <mapComponent
-            :meta-data="metaData"
-            :server-data="serverData"
-            :vehicle-data="vehicleData"
+            :meta-data-prop="metaData"
+            :vehicle-data-prop="vehicleData"
+            :farms-data-prop="farmsData"
             :show-fields="false"
             :show-vehicles="true"
           />
@@ -15,102 +15,7 @@
       </div>
     </div>
     <div
-      v-if="
-        serverData !== undefined &&
-        Object.keys(serverData).length > 5 &&
-        metaData !== undefined &&
-        Object.keys(metaData).length > 2
-      "
-      class="col-12 col-sm-12 col-md-6 col-lg-4 col-xl-3 col-xxl-3 mb-3"
-    >
-      <div class="card">
-        <div
-          class="card-header clickable"
-          data-bs-toggle="collapse"
-          data-bs-target="#server"
-          aria-expanded="false"
-          aria-controls="server"
-        >
-          <h5 class="card-title">
-            {{ $t("serverinfo") }}
-          </h5>
-        </div>
-        <div class="collapse card-body" id="server">
-          <table class="table">
-            <tbody>
-              <tr>
-                <th>Name</th>
-                <td>{{ serverData.name }}</td>
-              </tr>
-              <tr>
-                <th>Version</th>
-                <td>{{ serverData.version }}</td>
-              </tr>
-              <tr>
-                <th>Aktuelle Karte</th>
-                <td>{{ serverData.mapName }}</td>
-              </tr>
-              <tr>
-                <th>Spieler online</th>
-                <td>
-                  {{ serverData.Slots.numUsed }} /
-                  {{ serverData.Slots.capacity }}
-                </td>
-              </tr>
-              <tr>
-                <th>Geld</th>
-                <td v-if="metaData.statistics.money !== undefined">
-                  {{
-                    $n(Number.parseFloat(metaData.statistics.money), "currency")
-                  }}
-                </td>
-              </tr>
-              <tr>
-                <th>Automatisches Speicherintervall</th>
-                <td v-if="metaData.settings.autoSaveInterval !== 0.0">
-                  Alle {{ metaData.settings.autoSaveInterval }} Min.
-                </td>
-                <td v-else>Aus</td>
-              </tr>
-              <tr>
-                <th>Schwierigkeit</th>
-                <td>
-                  {{ $t("difficulty_" + metaData.settings.difficulty) }}
-                </td>
-              </tr>
-              <tr>
-                <th>Schwierigkeit Wirtschaft</th>
-                <td>
-                  {{ $t("difficulty_" + metaData.settings.economicDifficulty) }}
-                </td>
-              </tr>
-              <tr>
-                <th>Zeitskalierung</th>
-                <td v-if="metaData.settings.timeScale !== 1.0">
-                  x{{ metaData.settings.timeScale }}
-                </td>
-                <td v-else>
-                  {{ $t("realtime") }}
-                </td>
-              </tr>
-              <tr>
-                <th>Verkehr</th>
-                <td>
-                  {{ $t("on_off_" + metaData.settings.trafficEnabled) }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-    <div
-      v-if="
-        ((serverData !== undefined && Object.keys(serverData).length <= 5) ||
-          serverData === undefined) &&
-        metaData !== undefined &&
-        Object.keys(metaData).length > 2
-      "
+      v-if="metaData !== undefined && Object.keys(metaData).length > 2"
       class="col-12 col-sm-12 col-md-6 col-lg-4 col-xl-3 col-xxl-3 mb-3"
     >
       <div class="card">
@@ -405,41 +310,7 @@
       </div>
     </div>
     <div
-      v-if="serverData !== undefined && Object.keys(serverData).length > 5"
-      class="col-12 col-sm-12 col-md-6 col-lg-4 col-xl-3 col-xxl-3 mb-3"
-    >
-      <div class="card">
-        <div
-          class="card-header clickable"
-          data-bs-toggle="collapse"
-          data-bs-target="#mods"
-          aria-expanded="false"
-          aria-controls="mods"
-        >
-          <h5 class="card-title">
-            {{ $t("mods") }}
-          </h5>
-        </div>
-        <div class="card-body collapse" id="mods">
-          <table class="table">
-            <tbody>
-              <tr v-for="mod in serverData.Mods.Mod" :key="mod.hash">
-                <th>{{ mod.text }}</th>
-                <td>{{ mod.author }}</td>
-                <td>{{ mod.version }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-    <div
-      v-if="
-        ((serverData !== undefined && Object.keys(serverData).length <= 5) ||
-          serverData === undefined) &&
-        metaData !== undefined &&
-        Object.keys(metaData).length > 2
-      "
+      v-if="metaData !== undefined && Object.keys(metaData).length > 2"
       class="col-12 col-sm-12 col-md-6 col-lg-4 col-xl-3 col-xxl-3 mb-3"
     >
       <div class="card">
@@ -593,6 +464,44 @@
         </div>
       </div>
     </div>
+    <div
+      v-if="farmsData !== undefined && Object.keys(farmsData).length > 0"
+      class="col-12 col-sm-12 col-md-6 col-lg-4 col-xl-3 col-xxl-3 mb-3"
+    >
+      <div class="card">
+        <div
+          class="card-header clickable"
+          data-bs-toggle="collapse"
+          data-bs-target="#farms"
+          aria-expanded="false"
+          aria-controls="farms"
+        >
+          <h5 class="card-title">
+            {{ $t("farms") }}
+          </h5>
+        </div>
+        <div class="card-body collapse" id="farms">
+          <table class="table">
+            <tbody>
+              <tr v-for="farm in farmsData.farm" :key="farm.farmId">
+                <span :style="'color: ' + this.getFarmColorById(farm.farmId)">
+                  {{ farm.name }}
+                </span>
+                <div
+                  :style="
+                    'color: ' +
+                    this.getFarmColorById(farm.farmId) +
+                    '; display: inline-block'
+                  "
+                >
+                  <font-awesome-icon :icon="['fad', 'user-cowboy']" />
+                </div>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -604,6 +513,7 @@ import vSelect from "vue-select";
 import calculationService from "@/services/calculationService";
 import MapComponent from "@/components/MapComponent.vue";
 import ForecastComponent from "@/components/ForecastComponent.vue";
+import farmsMap from "@/utils/farms";
 
 export default defineComponent({
   name: "OverviewComponent",
@@ -613,9 +523,9 @@ export default defineComponent({
     mapComponent: MapComponent,
   },
   props: {
-    serverData: Object as PropType<ServerData>,
     economyData: Object as PropType<EconomyData>,
     vehicleData: Object as PropType<VehicleData>,
+    farmsData: Object as PropType<FarmsData>,
     metaData: Object as PropType<MetaData>,
     environmentData: Object as PropType<EnvironmentData>,
     salesData: Object as PropType<SalesData>,
@@ -634,6 +544,7 @@ export default defineComponent({
       } as PeriodHistory,
     } as FillType,
     masonry: {} as Masonry,
+    masonryScript: {} as HTMLScriptElement,
   }),
   computed: {
     locale() {
@@ -671,6 +582,29 @@ export default defineComponent({
         return require("@/assets/icons/AIR.png");
       }
     },
+    getFarmColorById(id: number): string {
+      if (this.farmsData !== undefined && this.farmsData.farm !== undefined) {
+        for (let farm of this.farmsData.farm) {
+          if (farm.farmId === id && farm.color !== undefined) {
+            let farmColorData = farmsMap.get(farm.color);
+
+            if (farmColorData) {
+              return (
+                "rgba(" +
+                farmColorData[1] +
+                ", " +
+                farmColorData[2] +
+                ", " +
+                farmColorData[3] +
+                ", 1)"
+              );
+            }
+          }
+        }
+      }
+
+      return "rgba(255, 255, 255, 0.3)";
+    },
   },
   beforeUpdate(): void {
     if (
@@ -701,28 +635,23 @@ export default defineComponent({
       );
     }
   },
-  updated(): void {
-    if (
-      Array.from(document.head.childNodes.values())
-        .filter((child) => child.nodeName === "SCRIPT")
-        .map((child) =>
-          (child as HTMLScriptElement).attributes.getNamedItem("src")
-        )
-        .filter(
-          (srcAttr) =>
-            srcAttr !== null &&
-            srcAttr.value ===
-              "https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"
-        ).length === 0
-    ) {
-      let masonryScript = document.createElement("script");
-      masonryScript.setAttribute(
+  mounted(): void {
+    if (this.masonryScript.id === undefined) {
+      this.masonryScript = document.createElement("script");
+      this.masonryScript.setAttribute(
         "src",
         "https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"
       );
-      document.head.appendChild(masonryScript);
+      this.masonryScript.setAttribute("id", "masonryScript");
+      document.head.appendChild(this.masonryScript);
     }
-
+  },
+  unmounted(): void {
+    if (this.masonryScript.id !== undefined) {
+      document.head.removeChild(this.masonryScript);
+    }
+  },
+  updated(): void {
     let row = document.querySelector("#masonry") as Element;
     this.masonry = new Masonry(row, {
       percentPosition: true,
