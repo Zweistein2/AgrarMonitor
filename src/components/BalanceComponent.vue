@@ -217,8 +217,22 @@ import farmsMap from "@/utils/farms";
 
 export default defineComponent({
   name: "BalanceComponent",
+  data: () => ({
+    farmsData: {} as FarmsData,
+  }),
   props: {
-    farmsData: Object as PropType<FarmsData>,
+    farmsDataProp: Object as PropType<FarmsData>,
+  },
+  watch: {
+    farmsDataProp: {
+      handler: function (val) {
+        if (val !== undefined) {
+          this.farmsData = val;
+        }
+      },
+      deep: true,
+      immediate: true,
+    },
   },
   methods: {
     calculateDayTotal(day: FarmFinanceStat): number {
@@ -241,8 +255,8 @@ export default defineComponent({
       } as ChartData<"line", number[]>;
 
       for (let farm of this.farmsData.farm) {
-        if (farm.farmId && farm.name) {
-          let farmColorData = farmsMap.get(farm.farmId);
+        if (farm.farmId && farm.name && farm.color) {
+          let farmColorData = farmsMap.get(farm.color);
 
           if (farmColorData && farm.finances && farm.finances.stats) {
             let labelDataMap = new Map<string, number>();

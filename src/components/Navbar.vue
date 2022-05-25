@@ -12,7 +12,6 @@
               locale: this.$i18n.locale,
             },
             query: {
-              serverCode: this.$route.query.serverCode,
               savegame: this.$route.query.savegame,
             },
           }"
@@ -43,7 +42,6 @@
                   locale: this.$i18n.locale,
                 },
                 query: {
-                  serverCode: this.$route.query.serverCode,
                   savegame: this.$route.query.savegame,
                 },
               }"
@@ -61,7 +59,6 @@
                   locale: this.$i18n.locale,
                 },
                 query: {
-                  serverCode: this.$route.query.serverCode,
                   savegame: this.$route.query.savegame,
                 },
               }"
@@ -79,7 +76,6 @@
                   locale: this.$i18n.locale,
                 },
                 query: {
-                  serverCode: this.$route.query.serverCode,
                   savegame: this.$route.query.savegame,
                 },
               }"
@@ -161,6 +157,24 @@
           </li>
           <li class="nav-item">
             <router-link
+              class="nav-link"
+              id="farmsLink"
+              :to="{
+                name: 'Farms',
+                params: {
+                  locale: this.$i18n.locale,
+                },
+                query: {
+                  serverCode: this.$route.query.serverCode,
+                  savegame: this.$route.query.savegame,
+                },
+              }"
+            >
+              {{ $t("farms") }}
+            </router-link>
+          </li>
+          <li class="nav-item">
+            <router-link
               class="nav-link disabled"
               id="productionsLink"
               :to="{
@@ -209,6 +223,9 @@
         {{ $d(today, "date") }} -
         {{ $d(today, "time") }}
       </div>
+      <div class="mb-2 mb-lg-0 me-2 pe-2 separated">
+        <savegameSwitcher />
+      </div>
       <div class="mb-2 mb-lg-0">
         <localeSwitcher />
       </div>
@@ -219,11 +236,13 @@
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
 import LocaleSwitcher from "@/components/LocaleSwitcher.vue";
+import SavegameSwitcher from "@/components/SavegameSwitcher.vue";
 
 export default defineComponent({
   name: "Navbar",
   components: {
     localeSwitcher: LocaleSwitcher,
+    SavegameSwitcher: SavegameSwitcher,
   },
   computed: {
     locale() {
@@ -232,10 +251,11 @@ export default defineComponent({
   },
   props: {
     active: String,
-    environmentData: Object as PropType<EnvironmentData>,
+    environmentDataProp: Object as PropType<EnvironmentData>,
   },
   data: () => ({
     today: new Date(),
+    environmentData: {} as EnvironmentData,
   }),
   watch: {
     locale(): void {
@@ -250,6 +270,17 @@ export default defineComponent({
         },
       });
     },
+    environmentDataProp: {
+      handler: function (val) {
+        if (val !== undefined) {
+          this.environmentData = val;
+
+          this.updateTime();
+        }
+      },
+      deep: true,
+      immediate: true,
+    },
   },
   mounted() {
     if (this.active) {
@@ -260,34 +291,52 @@ export default defineComponent({
       }
     }
   },
-  beforeUpdate() {
-    if (
-      this.environmentData &&
-      this.environmentData.dayTime &&
-      this.environmentData.daysPerPeriod &&
-      this.environmentData.currentDay &&
-      this.environmentData.weather &&
-      this.environmentData.weather.forecast
-    ) {
-      let currentMonth =
-        Math.ceil(
-          this.environmentData.currentDay / this.environmentData.daysPerPeriod
-        ) % 12;
-      let currentDay =
-        ((this.environmentData.currentDay / this.environmentData.daysPerPeriod -
-          currentMonth +
-          1) *
-          this.environmentData.daysPerPeriod) %
-        12;
+  methods: {
+    updateTime(): void {
+      if (
+        this.environmentData &&
+        this.environmentData.daysPerPeriod &&
+        this.environmentData.currentDay &&
+        this.environmentData.weather &&
+        this.environmentData.weather.forecast
+      ) {
+        let currentMonth =
+          Math.ceil(
+            this.environmentData.currentDay / this.environmentData.daysPerPeriod
+          ) % 12;
+        let currentDay =
+          ((this.environmentData.currentDay /
+            this.environmentData.daysPerPeriod -
+            currentMonth +
+            1) *
+            this.environmentData.daysPerPeriod) %
+          12;
 
-      this.today = new Date(
-        1999,
-        currentMonth + 1,
-        currentDay,
-        ~~(this.environmentData.dayTime / 60),
-        ~~(this.environmentData.dayTime % 60)
-      );
-    }
+        if (
+          this.environmentData.dayTimeHour !== undefined &&
+          this.environmentData.dayTimeMinutes !== undefined
+        ) {
+          this.today = new Date(
+            1999,
+            currentMonth + 1,
+            currentDay,
+            this.environmentData.dayTimeHour,
+            this.environmentData.dayTimeMinutes
+          );
+        } else if (this.environmentData.dayTime !== undefined) {
+          this.today = new Date(
+            1999,
+            currentMonth + 1,
+            currentDay,
+            ~~(this.environmentData.dayTime / 60),
+            ~~(this.environmentData.dayTime % 60)
+          );
+        }
+      }
+    },
+  },
+  beforeUpdate() {
+    this.updateTime();
   },
 });
 </script>

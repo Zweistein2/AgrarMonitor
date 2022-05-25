@@ -15,5 +15,14 @@
   "EMPTYPALLET": "Palette (Leer)",
   "OSBPALLET": "Palette (OSB Platte)",
   "SPANPALLET": "Palette (Spanplatte)",
+  "CARDBOARD": "Karton",
+  "PAPER": "Papier",
+  "KLOPAPIER": "Klopapier",
+  "MOLASSES": "Melasse",
+  "WEIZENMALZ": "Weizenmalz",
+  "GERSTENMALZ": "Gerstenmalz",
+  "HEFE": "Hefe",
+  "GERSTENFASSBIER": "Gerstenfassbier",
+  "WEIZENFASSBIER": "Weizenfassbier",
   "NFMarsch": "Nordfriesische Marsch"
 }

@@ -1,34 +1,31 @@
 <template>
-  <navbar active="calculatorLink" :environment-data-prop="environmentData" />
-  <CalculationComponent
-    :economy-data-prop="economyData"
-    :meta-data-prop="metaData"
-  />
+  <navbar active="farmsLink" :environment-data-prop="environmentData" />
+  <div class="row m-1">
+    <FarmsComponent :farms-data-prop="farmsData" />
+  </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import Navbar from "@/components/Navbar.vue";
-import CalculationComponent from "@/components/CalculationComponent.vue";
 import dataService from "@/services/dataService";
+import Navbar from "@/components/Navbar.vue";
+import FarmsComponent from "@/components/FarmsComponent.vue";
 import router from "@/router";
 import mappingService from "@/services/mappingService";
 
 export default defineComponent({
-  name: "CalculationView",
+  name: "FarmsView",
   components: {
-    CalculationComponent,
+    FarmsComponent,
     navbar: Navbar,
   },
   data: (): {
-    economyData: EconomyData;
+    farmsData: FarmsData;
     environmentData: EnvironmentData;
-    metaData: MetaData;
     websocketData: WebsocketData | undefined;
   } => ({
-    economyData: {} as EconomyData,
+    farmsData: {} as FarmsData,
     environmentData: {} as EnvironmentData,
-    metaData: {} as MetaData,
     websocketData: {} as WebsocketData,
   }),
   watch: {
@@ -36,10 +33,10 @@ export default defineComponent({
       if (val !== undefined) {
         let websocketData = val as WebsocketData;
 
-        if (websocketData.economyData) {
-          this.economyData = mappingService.mapEconomyData(
-            websocketData.economyData,
-            this.economyData
+        if (websocketData.farmData) {
+          this.farmsData = mappingService.mapFarmData(
+            websocketData.farmData,
+            this.farmsData
           );
         }
 
@@ -47,21 +44,6 @@ export default defineComponent({
           this.environmentData = mappingService.mapEnvironmentData(
             websocketData.environmentData,
             this.environmentData
-          );
-        }
-
-        if (websocketData.metadataData && websocketData.farmData) {
-          this.metaData = mappingService.mapMetaData(
-            websocketData.metadataData,
-            websocketData.farmData,
-            this.metaData
-          );
-        }
-
-        if (websocketData.modsData) {
-          this.metaData = mappingService.mapModData(
-            websocketData.modsData,
-            this.metaData
           );
         }
 
@@ -76,7 +58,7 @@ export default defineComponent({
               websocketData.metadataData.metadata[0].savegameIndex.toString())
         ) {
           await router.push({
-            name: "Calculation",
+            name: "Farms",
             params: {
               locale: this.$i18n.locale,
             },
@@ -97,12 +79,25 @@ export default defineComponent({
     queryData: async function (): Promise<void> {
       let url = window.location.origin as string;
       let savegame = this.$route.query.savegame as string;
-      this.economyData = await dataService.getEconomyData(url, savegame);
+      let farmsDataRaw = (await dataService.getFarmsData(
+        url,
+        savegame
+      )) as FarmsData;
+
+      if (farmsDataRaw && farmsDataRaw.farm) {
+        for (let farm of farmsDataRaw.farm) {
+          if (farm.contracting === undefined) {
+            farm.contracting = {} as FarmContracts;
+            farm.contracting.farm = Array<FarmContract>();
+          }
+        }
+      }
+
+      this.farmsData = farmsDataRaw;
       this.environmentData = await dataService.getEnvironmentData(
         url,
         savegame
       );
-      this.metaData = await dataService.getMetaData(url, savegame);
     },
     queryWebsocketData: async function () {
       dataService.getWebsocketData();

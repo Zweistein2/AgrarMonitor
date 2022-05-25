@@ -5,9 +5,10 @@
         <div class="card-header">{{ $t("map") }}</div>
         <div class="card-body">
           <mapComponent
-            :meta-data="metaData"
-            :server-data="serverData"
-            :vehicle-data="vehicleData"
+            :meta-data-prop="metaData"
+            :vehicle-data-prop="vehicleData"
+            :farms-data-prop="farmsData"
+            :player-data-prop="playerData"
             :show-fields="false"
             :show-vehicles="true"
           />
@@ -15,102 +16,7 @@
       </div>
     </div>
     <div
-      v-if="
-        serverData !== undefined &&
-        Object.keys(serverData).length > 5 &&
-        metaData !== undefined &&
-        Object.keys(metaData).length > 2
-      "
-      class="col-12 col-sm-12 col-md-6 col-lg-4 col-xl-3 col-xxl-3 mb-3"
-    >
-      <div class="card">
-        <div
-          class="card-header clickable"
-          data-bs-toggle="collapse"
-          data-bs-target="#server"
-          aria-expanded="false"
-          aria-controls="server"
-        >
-          <h5 class="card-title">
-            {{ $t("serverinfo") }}
-          </h5>
-        </div>
-        <div class="collapse card-body" id="server">
-          <table class="table">
-            <tbody>
-              <tr>
-                <th>Name</th>
-                <td>{{ serverData.name }}</td>
-              </tr>
-              <tr>
-                <th>Version</th>
-                <td>{{ serverData.version }}</td>
-              </tr>
-              <tr>
-                <th>Aktuelle Karte</th>
-                <td>{{ serverData.mapName }}</td>
-              </tr>
-              <tr>
-                <th>Spieler online</th>
-                <td>
-                  {{ serverData.Slots.numUsed }} /
-                  {{ serverData.Slots.capacity }}
-                </td>
-              </tr>
-              <tr>
-                <th>Geld</th>
-                <td v-if="metaData.statistics.money !== undefined">
-                  {{
-                    $n(Number.parseFloat(metaData.statistics.money), "currency")
-                  }}
-                </td>
-              </tr>
-              <tr>
-                <th>Automatisches Speicherintervall</th>
-                <td v-if="metaData.settings.autoSaveInterval !== 0.0">
-                  Alle {{ metaData.settings.autoSaveInterval }} Min.
-                </td>
-                <td v-else>Aus</td>
-              </tr>
-              <tr>
-                <th>Schwierigkeit</th>
-                <td>
-                  {{ $t("difficulty_" + metaData.settings.difficulty) }}
-                </td>
-              </tr>
-              <tr>
-                <th>Schwierigkeit Wirtschaft</th>
-                <td>
-                  {{ $t("difficulty_" + metaData.settings.economicDifficulty) }}
-                </td>
-              </tr>
-              <tr>
-                <th>Zeitskalierung</th>
-                <td v-if="metaData.settings.timeScale !== 1.0">
-                  x{{ metaData.settings.timeScale }}
-                </td>
-                <td v-else>
-                  {{ $t("realtime") }}
-                </td>
-              </tr>
-              <tr>
-                <th>Verkehr</th>
-                <td>
-                  {{ $t("on_off_" + metaData.settings.trafficEnabled) }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-    <div
-      v-if="
-        ((serverData !== undefined && Object.keys(serverData).length <= 5) ||
-          serverData === undefined) &&
-        metaData !== undefined &&
-        Object.keys(metaData).length > 2
-      "
+      v-if="metaData !== undefined && Object.keys(metaData).length > 2"
       class="col-12 col-sm-12 col-md-6 col-lg-4 col-xl-3 col-xxl-3 mb-3"
     >
       <div class="card">
@@ -405,41 +311,7 @@
       </div>
     </div>
     <div
-      v-if="serverData !== undefined && Object.keys(serverData).length > 5"
-      class="col-12 col-sm-12 col-md-6 col-lg-4 col-xl-3 col-xxl-3 mb-3"
-    >
-      <div class="card">
-        <div
-          class="card-header clickable"
-          data-bs-toggle="collapse"
-          data-bs-target="#mods"
-          aria-expanded="false"
-          aria-controls="mods"
-        >
-          <h5 class="card-title">
-            {{ $t("mods") }}
-          </h5>
-        </div>
-        <div class="card-body collapse" id="mods">
-          <table class="table">
-            <tbody>
-              <tr v-for="mod in serverData.Mods.Mod" :key="mod.hash">
-                <th>{{ mod.text }}</th>
-                <td>{{ mod.author }}</td>
-                <td>{{ mod.version }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-    <div
-      v-if="
-        ((serverData !== undefined && Object.keys(serverData).length <= 5) ||
-          serverData === undefined) &&
-        metaData !== undefined &&
-        Object.keys(metaData).length > 2
-      "
+      v-if="metaData !== undefined && Object.keys(metaData).length > 2"
       class="col-12 col-sm-12 col-md-6 col-lg-4 col-xl-3 col-xxl-3 mb-3"
     >
       <div class="card">
@@ -587,9 +459,45 @@
           </h5>
         </div>
         <div class="card-body collapse" id="environment">
-          <div class="row row-cols-6">
-            <forecastComponent :environment-data="environmentData" />
-          </div>
+          <forecastComponent :environment-data-prop="environmentData" />
+        </div>
+      </div>
+    </div>
+    <div
+      v-if="farmsData !== undefined && Object.keys(farmsData).length > 0"
+      class="col-12 col-sm-12 col-md-6 col-lg-4 col-xl-3 col-xxl-3 mb-3"
+    >
+      <div class="card">
+        <div
+          class="card-header clickable"
+          data-bs-toggle="collapse"
+          data-bs-target="#farms"
+          aria-expanded="false"
+          aria-controls="farms"
+        >
+          <h5 class="card-title">
+            {{ $t("farms") }}
+          </h5>
+        </div>
+        <div class="card-body collapse" id="farms">
+          <table class="table">
+            <tbody>
+              <tr v-for="farm in farmsData.farm" :key="farm.farmId">
+                <span :style="'color: ' + this.getFarmColorById(farm.farmId)">
+                  {{ farm.name }}
+                </span>
+                <div
+                  :style="
+                    'color: ' +
+                    this.getFarmColorById(farm.farmId) +
+                    '; display: inline-block'
+                  "
+                >
+                  <font-awesome-icon :icon="['fad', 'user-cowboy']" />
+                </div>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -604,6 +512,7 @@ import vSelect from "vue-select";
 import calculationService from "@/services/calculationService";
 import MapComponent from "@/components/MapComponent.vue";
 import ForecastComponent from "@/components/ForecastComponent.vue";
+import farmsMap from "@/utils/farms";
 
 export default defineComponent({
   name: "OverviewComponent",
@@ -613,12 +522,13 @@ export default defineComponent({
     mapComponent: MapComponent,
   },
   props: {
-    serverData: Object as PropType<ServerData>,
-    economyData: Object as PropType<EconomyData>,
-    vehicleData: Object as PropType<VehicleData>,
-    metaData: Object as PropType<MetaData>,
-    environmentData: Object as PropType<EnvironmentData>,
-    salesData: Object as PropType<SalesData>,
+    economyDataProp: Object as PropType<EconomyData>,
+    vehicleDataProp: Object as PropType<VehicleData>,
+    farmsDataProp: Object as PropType<FarmsData>,
+    metaDataProp: Object as PropType<MetaData>,
+    environmentDataProp: Object as PropType<EnvironmentData>,
+    salesDataProp: Object as PropType<SalesData>,
+    playerDataProp: Object as PropType<PlayerData>,
   },
   data: () => ({
     today: new Date(),
@@ -634,6 +544,14 @@ export default defineComponent({
       } as PeriodHistory,
     } as FillType,
     masonry: {} as Masonry,
+    masonryScript: {} as HTMLScriptElement,
+    economyData: {} as EconomyData,
+    vehicleData: {} as VehicleData,
+    farmsData: {} as FarmsData,
+    metaData: {} as MetaData,
+    environmentData: {} as EnvironmentData,
+    salesData: {} as SalesData,
+    playerData: {} as PlayerData,
   }),
   computed: {
     locale() {
@@ -641,6 +559,15 @@ export default defineComponent({
     },
   },
   watch: {
+    economyDataProp: {
+      handler: function (val) {
+        if (val !== undefined) {
+          this.economyData = val;
+        }
+      },
+      deep: true,
+      immediate: true,
+    },
     economyData: function () {
       if (
         this.economyData &&
@@ -650,6 +577,62 @@ export default defineComponent({
       ) {
         this.selectedFillType = this.economyData.fillTypes.fillType[1];
       }
+    },
+    vehicleDataProp: {
+      handler: function (val) {
+        if (val !== undefined) {
+          this.vehicleData = val;
+        }
+      },
+      deep: true,
+      immediate: true,
+    },
+    farmsDataProp: {
+      handler: function (val) {
+        if (val !== undefined) {
+          this.farmsData = val;
+        }
+      },
+      deep: true,
+      immediate: true,
+    },
+    metaDataProp: {
+      handler: function (val) {
+        if (val !== undefined) {
+          this.metaData = val;
+        }
+      },
+      deep: true,
+      immediate: true,
+    },
+    environmentDataProp: {
+      handler: function (val) {
+        if (val !== undefined) {
+          this.environmentData = val;
+
+          this.updateTime();
+        }
+      },
+      deep: true,
+      immediate: true,
+    },
+    salesDataProp: {
+      handler: function (val) {
+        if (val !== undefined) {
+          this.salesData = val;
+        }
+      },
+      deep: true,
+      immediate: true,
+    },
+    playerDataProp: {
+      handler: function (val) {
+        if (val !== undefined) {
+          this.playerData = val;
+        }
+      },
+      deep: true,
+      immediate: true,
     },
   },
   methods: {
@@ -671,58 +654,92 @@ export default defineComponent({
         return require("@/assets/icons/AIR.png");
       }
     },
+    getFarmColorById(id: number): string {
+      if (this.farmsData !== undefined && this.farmsData.farm !== undefined) {
+        for (let farm of this.farmsData.farm) {
+          if (farm.farmId === id && farm.color !== undefined) {
+            let farmColorData = farmsMap.get(farm.color);
+
+            if (farmColorData) {
+              return (
+                "rgba(" +
+                farmColorData[1] +
+                ", " +
+                farmColorData[2] +
+                ", " +
+                farmColorData[3] +
+                ", 1)"
+              );
+            }
+          }
+        }
+      }
+
+      return "rgba(255, 255, 255, 0.3)";
+    },
+    updateTime(): void {
+      if (
+        this.environmentData &&
+        this.environmentData.daysPerPeriod &&
+        this.environmentData.currentDay &&
+        this.environmentData.weather &&
+        this.environmentData.weather.forecast
+      ) {
+        let currentMonth =
+          Math.ceil(
+            this.environmentData.currentDay / this.environmentData.daysPerPeriod
+          ) % 12;
+        let currentDay =
+          ((this.environmentData.currentDay /
+            this.environmentData.daysPerPeriod -
+            currentMonth +
+            1) *
+            this.environmentData.daysPerPeriod) %
+          12;
+
+        if (
+          this.environmentData.dayTimeHour !== undefined &&
+          this.environmentData.dayTimeMinutes !== undefined
+        ) {
+          this.today = new Date(
+            1999,
+            currentMonth + 1,
+            currentDay,
+            this.environmentData.dayTimeHour,
+            this.environmentData.dayTimeMinutes
+          );
+        } else if (this.environmentData.dayTime !== undefined) {
+          this.today = new Date(
+            1999,
+            currentMonth + 1,
+            currentDay,
+            ~~(this.environmentData.dayTime / 60),
+            ~~(this.environmentData.dayTime % 60)
+          );
+        }
+      }
+    },
   },
   beforeUpdate(): void {
-    if (
-      this.environmentData &&
-      this.environmentData.dayTime &&
-      this.environmentData.daysPerPeriod &&
-      this.environmentData.currentDay &&
-      this.environmentData.weather &&
-      this.environmentData.weather.forecast
-    ) {
-      let currentMonth =
-        Math.ceil(
-          this.environmentData.currentDay / this.environmentData.daysPerPeriod
-        ) % 12;
-      let currentDay =
-        ((this.environmentData.currentDay / this.environmentData.daysPerPeriod -
-          currentMonth +
-          1) *
-          this.environmentData.daysPerPeriod) %
-        12;
-
-      this.today = new Date(
-        1999,
-        currentMonth + 1,
-        currentDay,
-        ~~(this.environmentData.dayTime / 60),
-        ~~(this.environmentData.dayTime % 60)
-      );
-    }
+    this.updateTime();
   },
-  updated(): void {
-    if (
-      Array.from(document.head.childNodes.values())
-        .filter((child) => child.nodeName === "SCRIPT")
-        .map((child) =>
-          (child as HTMLScriptElement).attributes.getNamedItem("src")
-        )
-        .filter(
-          (srcAttr) =>
-            srcAttr !== null &&
-            srcAttr.value ===
-              "https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"
-        ).length === 0
-    ) {
-      let masonryScript = document.createElement("script");
-      masonryScript.setAttribute(
+  mounted(): void {
+    if (this.masonryScript.id === undefined) {
+      this.masonryScript = document.createElement("script");
+      this.masonryScript.setAttribute(
         "src",
         "https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"
       );
-      document.head.appendChild(masonryScript);
+      this.masonryScript.setAttribute("id", "masonryScript");
+      document.head.appendChild(this.masonryScript);
     }
-
+  },
+  unmounted(): void {
+    if (this.masonryScript.id !== undefined) {
+      document.head.removeChild(this.masonryScript);
+    }
+  },
+  updated(): void {
     let row = document.querySelector("#masonry") as Element;
     this.masonry = new Masonry(row, {
       percentPosition: true,

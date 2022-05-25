@@ -1,86 +1,3 @@
-type Vehicle = {
-  name: string | undefined;
-  category: string | undefined;
-  type: string | undefined;
-  x: number | undefined;
-  y: number | undefined;
-  z: number | undefined;
-  fillTypes: string | undefined;
-  fillLevels: string | undefined;
-  isAIActive: boolean | undefined;
-};
-
-type Player = {
-  text: string | undefined;
-  isUsed: boolean | undefined;
-  isAdmin: boolean | undefined;
-  uptime: number | undefined;
-  x: number | undefined;
-  y: number | undefined;
-  z: number | undefined;
-};
-
-type Mod = {
-  text: string | undefined;
-  name: string | undefined;
-  author: string | undefined;
-  hash: string | undefined;
-  version: string | undefined;
-};
-
-type Field = {
-  id: number | undefined;
-  isOwned: boolean | undefined;
-  x: number | undefined;
-  z: number | undefined;
-};
-
-type Farmland = {
-  area: number | undefined;
-  id: number | undefined;
-  name: string | undefined;
-  owner: number | undefined;
-  x: number | undefined;
-  z: number | undefined;
-};
-
-type FarmlandWrapper = {
-  Farmland: Array<Farmland>;
-};
-
-type FieldWrapper = {
-  Field: Array<Field>;
-};
-
-type ModWrapper = {
-  Mod: Array<Mod>;
-};
-
-type SlotWrapper = {
-  capacity: number | undefined;
-  numUsed: number | undefined;
-  Player: Array<Player>;
-};
-
-type VehicleWrapper = {
-  Vehicle: Array<Vehicle>;
-};
-
-type ServerData = {
-  Farmlands: FarmlandWrapper | undefined;
-  Fields: FieldWrapper | undefined;
-  Mods: ModWrapper | undefined;
-  Slots: SlotWrapper | undefined;
-  Vehicles: VehicleWrapper | undefined;
-  dayTime: number | undefined;
-  game: string | undefined;
-  mapName: string | undefined;
-  mapOverviewFilename: string | undefined;
-  mapSize: number | undefined;
-  name: string | undefined;
-  version: string | undefined;
-};
-
 type EconomyData = {
   fillTypes: FillTypeWrapper;
 };
@@ -164,6 +81,8 @@ type VehicleFillState = {
 
 type EnvironmentData = {
   dayTime: number | undefined;
+  dayTimeHour: number | undefined;
+  dayTimeMinutes: number | undefined;
   currentDay: number | undefined;
   currentMonotonicDay: number | undefined;
   realHourTimer: number | undefined;
@@ -217,6 +136,18 @@ type ForecastTimeslot = {
   typeName: string | undefined;
   start: Date | undefined;
   end: Date | undefined;
+};
+
+type PlayerData = {
+  players: Array<Player>;
+};
+
+type Player = {
+  name: string | undefined;
+  x: number | undefined;
+  y: number | undefined;
+  z: number | undefined;
+  farmId: number | undefined;
 };
 
 type VehicleData = {
@@ -575,6 +506,7 @@ type Farm = {
   players: FarmPlayerWrapper | undefined;
   statistics: FarmStatistics | undefined;
   finances: FarmFinances | undefined;
+  contracting: FarmContracts | undefined;
 };
 
 type FarmPlayerWrapper = {
@@ -652,6 +584,14 @@ type FarmFinances = {
   stats: Array<FarmFinanceStat>;
 };
 
+type FarmContracts = {
+  farm: Array<FarmContract>;
+};
+
+type FarmContract = {
+  farmId: number | undefined;
+};
+
 type FarmFinanceStat = {
   day: number | undefined;
   newVehiclesCost: number | undefined;
@@ -710,6 +650,7 @@ type Mission = {
   reward: number | undefined;
   status: number | undefined;
   success: boolean | undefined;
+  completion: number | undefined;
   farmId: number | undefined;
   field: MissionField | undefined;
   bale: MissionBale | undefined;
@@ -753,9 +694,416 @@ type MissionDelivery = {
   unloadingStationIndex: number | undefined;
   pricePerLitre: number | undefined;
   expectedLiters: number | undefined;
+  depositedLiters: number | undefined;
   contractDay: number | undefined;
   contractTime: number | undefined;
   contractDuration: number | undefined;
   npcIndex: number | undefined;
   fillType: string | undefined;
+};
+
+type WebsocketFieldWrapper = {
+  fields: Array<WebsocketField>;
+};
+
+type WebsocketField = {
+  fieldID: number | undefined;
+  areaInHectar: number | undefined;
+  fruitType: number | undefined;
+  x: number | undefined;
+  z: number | undefined;
+};
+
+type WebsocketPlayerWrapper = {
+  players: Array<WebsocketPlayer>;
+};
+
+type WebsocketPlayer = {
+  name: string | undefined;
+  x: number | undefined;
+  y: number | undefined;
+  z: number | undefined;
+  farmId: number | undefined;
+  id: number | undefined;
+};
+
+type WebsocketFarmWrapper = {
+  farms: Array<WebsocketFarm>;
+};
+
+type WebsocketFarm = {
+  farmID: number | undefined;
+  loan: number | undefined;
+  loanMax: number | undefined;
+  money: number | undefined;
+  name: string | undefined;
+  players: Array<WebsocketFarmPlayer>;
+  stats: Array<WebsocketFarmStat>;
+  finances: Array<WebsocketFarmFinance>;
+  financeHistory: Array<WebsocketFarmFinanceHistory>;
+};
+
+type WebsocketFarmPlayer = {
+  lastNickname: string | undefined;
+  isFarmManager: boolean | undefined;
+  permissions: Array<WebsocketFarmPlayerPermission>;
+};
+
+type WebsocketFarmPlayerPermission = {
+  manageContracting: boolean | undefined;
+  manageContracts: boolean | undefined;
+  transferMoney: boolean | undefined;
+  updateFarm: boolean | undefined;
+  manageRights: boolean | undefined;
+  sellVehicle: boolean | undefined;
+  resetVehicle: boolean | undefined;
+  landscaping: boolean | undefined;
+  hireAssistant: boolean | undefined;
+  sellPlaceable: boolean | undefined;
+  createFields: boolean | undefined;
+  buyPlaceable: boolean | undefined;
+  buyVehicle: boolean | undefined;
+  tradeAnimals: boolean | undefined;
+};
+
+type WebsocketFarmStat = {
+  revenue: Array<WebsocketFarmStatValue> | undefined;
+  harvestedOlives: Array<WebsocketFarmStatValue> | undefined;
+  harvestedGrapes: Array<WebsocketFarmStatValue> | undefined;
+  threshedHectares: Array<WebsocketFarmStatValue> | undefined;
+  sprayedHectares: Array<WebsocketFarmStatValue> | undefined;
+  sownHectares: Array<WebsocketFarmStatValue> | undefined;
+  plowedTime: Array<WebsocketFarmStatValue> | undefined;
+  workedHectares: Array<WebsocketFarmStatValue> | undefined;
+  traveledDistance: Array<WebsocketFarmStatValue> | undefined;
+  sprayUsage: Array<WebsocketFarmStatValue> | undefined;
+  seedUsage: Array<WebsocketFarmStatValue> | undefined;
+  sownTime: Array<WebsocketFarmStatValue> | undefined;
+  cultivatedTime: Array<WebsocketFarmStatValue> | undefined;
+  workedTime: Array<WebsocketFarmStatValue> | undefined;
+  plowedHectares: Array<WebsocketFarmStatValue> | undefined;
+  soldCottonBales: Array<WebsocketFarmStatValue> | undefined;
+  wrappedBales: Array<WebsocketFarmStatValue> | undefined;
+  storedBales: Array<WebsocketFarmStatValue> | undefined;
+  workersHired: Array<WebsocketFarmStatValue> | undefined;
+  horseDistance: Array<WebsocketFarmStatValue> | undefined;
+  cutTreeCount: Array<WebsocketFarmStatValue> | undefined;
+  repairVehicleCount: Array<WebsocketFarmStatValue> | undefined;
+  carDistance: Array<WebsocketFarmStatValue> | undefined;
+  truckDistance: Array<WebsocketFarmStatValue> | undefined;
+  tractorDistance: Array<WebsocketFarmStatValue> | undefined;
+  petDogCount: Array<WebsocketFarmStatValue> | undefined;
+  breedChickenCount: Array<WebsocketFarmStatValue> | undefined;
+  breedPigsCount: Array<WebsocketFarmStatValue> | undefined;
+  breedSheepCount: Array<WebsocketFarmStatValue> | undefined;
+  breedCowsCount: Array<WebsocketFarmStatValue> | undefined;
+  horseJumpCount: Array<WebsocketFarmStatValue> | undefined;
+  cultivatedHectares: Array<WebsocketFarmStatValue> | undefined;
+  baleCount: Array<WebsocketFarmStatValue> | undefined;
+  woodTonsSold: Array<WebsocketFarmStatValue> | undefined;
+  repaintVehicleCount: Array<WebsocketFarmStatValue> | undefined;
+  fuelUsage: Array<WebsocketFarmStatValue> | undefined;
+  fieldJobMissionCount: Array<WebsocketFarmStatValue> | undefined;
+  transportMissionCount: Array<WebsocketFarmStatValue> | undefined;
+  fieldJobMissionByNPC: Array<WebsocketFarmStatValue> | undefined;
+  breedHorsesCount: Array<WebsocketFarmStatValue> | undefined;
+  weededHectares: Array<WebsocketFarmStatValue> | undefined;
+  sprayedTime: Array<WebsocketFarmStatValue> | undefined;
+  windTurbineCount: Array<WebsocketFarmStatValue> | undefined;
+  threshedTime: Array<WebsocketFarmStatValue> | undefined;
+  weededTime: Array<WebsocketFarmStatValue> | undefined;
+  plantedTreeCount: Array<WebsocketFarmStatValue> | undefined;
+  playTime: Array<WebsocketFarmStatValue> | undefined;
+  expenses: Array<WebsocketFarmStatValue> | undefined;
+};
+
+type WebsocketFarmStatValue = {
+  session: number | undefined;
+  total: number | undefined;
+};
+
+type WebsocketFarmFinance = {
+  vehicleLeasingCost: number | undefined;
+  missionIncome: number | undefined;
+  soldBales: number | undefined;
+  fieldSelling: number | undefined;
+  wagePayment: number | undefined;
+  soldWood: number | undefined;
+  fieldPurchase: number | undefined;
+  harvestIncome: number | undefined;
+  incomeBga: number | undefined;
+  purchaseWater: number | undefined;
+  soldMilk: number | undefined;
+  soldProducts: number | undefined;
+  purchaseSaplings: number | undefined;
+  soldBuildings: number | undefined;
+  productionCosts: number | undefined;
+  purchaseFuel: number | undefined;
+  constructionCost: number | undefined;
+  purchaseFertilizer: number | undefined;
+  propertyIncome: number | undefined;
+  newVehiclesCost: number | undefined;
+  propertyMaintenance: number | undefined;
+  soldWool: number | undefined;
+  other: number | undefined;
+  vehicleRunningCost: number | undefined;
+  newAnimalsCost: number | undefined;
+  purchaseSeeds: number | undefined;
+  loanInterest: number | undefined;
+  soldAnimals: number | undefined;
+  soldVehicles: number | undefined;
+};
+
+type WebsocketFarmFinanceHistory = {
+  0: Array<WebsocketFarmFinance> | undefined;
+  1: Array<WebsocketFarmFinance> | undefined;
+  2: Array<WebsocketFarmFinance> | undefined;
+  3: Array<WebsocketFarmFinance> | undefined;
+  4: Array<WebsocketFarmFinance> | undefined;
+};
+
+type WebsocketMetadataWrapper = {
+  metadata: Array<WebsocketMetadata>;
+};
+
+type WebsocketMetadata = {
+  terrainSize: number | undefined;
+  time: number | undefined;
+  worldOffset: number | undefined;
+  worldSize: number | undefined;
+  automaticMotorStartEnabled: boolean | undefined;
+  autoSaveInterval: number | undefined;
+  difficulty: number | undefined;
+  dirtInterval: number | undefined;
+  economicDifficulty: number | undefined;
+  fuelUsage: number | undefined;
+  fruitDestruction: boolean | undefined;
+  growthMode: number | undefined;
+  helperBuyFertilizer: boolean | undefined;
+  helperBuyFuel: boolean | undefined;
+  helperBuySeeds: boolean | undefined;
+  helperManureSource: number | undefined;
+  helperSlurrySource: number | undefined;
+  isSnowEnabled: boolean | undefined;
+  limeRequired: boolean | undefined;
+  mapTitle: string | undefined;
+  money: number | undefined;
+  plannedDaysPerPeriod: number | undefined;
+  plowingRequiredEnabled: boolean | undefined;
+  resetVehicles: boolean | undefined;
+  savegameIndex: number | undefined;
+  savegameName: string | undefined;
+  stonesEnabled: boolean | undefined;
+  stopAndGoBraking: boolean | undefined;
+  timeScale: number | undefined;
+  trafficEnabled: boolean | undefined;
+  trailerFillLimit: boolean | undefined;
+  weedsEnabled: boolean | undefined;
+};
+
+type WebsocketModsWrapper = {
+  mods: Array<WebsocketMod>;
+};
+
+type WebsocketMod = {
+  modID: number | undefined;
+  author: string | undefined;
+  modName: string | undefined;
+  title: string | undefined;
+  isDLC: boolean | undefined;
+  isMultiplayerSupported: boolean | undefined;
+  version: string | undefined;
+};
+
+type WebsocketMissionsWrapper = {
+  missions: Array<WebsocketMission>;
+};
+
+type WebsocketMission = {
+  completion: number | undefined;
+  fieldId: number | undefined;
+  farmId: number | undefined;
+  areaInHectar: number | undefined;
+  x: number | undefined;
+  z: number | undefined;
+  fieldPercentageDone: number | undefined;
+  moneyMultiplier: number | undefined;
+  reimbursementPerDifficulty: boolean | undefined;
+  reimbursementPerHa: number | undefined;
+  reward: number | undefined;
+  rewardPerHa: number | undefined;
+  spawnedVehicles: boolean | undefined;
+  success: boolean | undefined;
+  vehicleUseCost: number | undefined;
+  type: string | undefined;
+  expectedLiters: number | undefined;
+  depositedLiters: number | undefined;
+  fruitType: number | undefined;
+  fillType: number | undefined;
+  sellPointPlaceableId: number | undefined;
+  contractDay: number | undefined;
+  contractDuration: number | undefined;
+  contractTime: number | undefined;
+  contractLiters: number | undefined;
+  deliveredLiters: number | undefined;
+  leasingVehicles: Array<WebsocketLeasingVehicle>;
+};
+
+type WebsocketLeasingVehicle = {
+  vehicleNumber: number | undefined;
+  fileName: string | undefined;
+};
+
+type WebsocketEconomyWrapper = {
+  economy: Array<WebsocketEconomy>;
+};
+
+type WebsocketEconomy = {
+  name: string | undefined;
+  history: Array<WebsocketEconomyHistory>;
+};
+
+type WebsocketEconomyHistory = {
+  1: number | undefined;
+  2: number | undefined;
+  3: number | undefined;
+  4: number | undefined;
+  5: number | undefined;
+  6: number | undefined;
+  7: number | undefined;
+  8: number | undefined;
+  9: number | undefined;
+  10: number | undefined;
+  11: number | undefined;
+  12: number | undefined;
+};
+
+type WebsocketVehicleSalesWrapper = {
+  vehicleSales: Array<WebsocketVehicleSale>;
+};
+
+type WebsocketVehicleSale = {
+  name: string | undefined;
+  age: number | undefined;
+  damage: number | undefined;
+  price: number | undefined;
+  timeLeft: number | undefined;
+  wear: number | undefined;
+  operatingTime: number | undefined;
+};
+
+type WebsocketVehiclesWrapper = {
+  vehicles: Array<WebsocketVehicle>;
+};
+
+type WebsocketVehicle = {
+  name: string | undefined;
+  brand: string | undefined;
+  age: number | undefined;
+  price: number | undefined;
+  category: string | undefined;
+  ownerFarmId: number | undefined;
+  operatingTime: number | undefined;
+  id: number | undefined;
+  x: number | undefined;
+  y: number | undefined;
+  z: number | undefined;
+  fillUnits: Array<WebsocketVehicleFillUnits>;
+};
+
+type WebsocketVehicleFillUnits = {
+  fillType: number | undefined;
+  fillLevel: number | undefined;
+  capacity: number | undefined;
+  unitText: string | undefined;
+};
+
+type WebsocketNPCsWrapper = {
+  npcs: Array<WebsocketNPC>;
+};
+
+type WebsocketNPC = {
+  title: string | undefined;
+  finishedMissions: number | undefined;
+};
+
+type WebsocketEnvironmentWrapper = {
+  environment: Array<WebsocketEnvironment>;
+};
+
+type WebsocketEnvironment = {
+  currentDay: number | undefined;
+  currentDayInPeriod: number | undefined;
+  currentDayInSeason: number | undefined;
+  currentHour: number | undefined;
+  currentMinute: number | undefined;
+  currentMonotonicDay: number | undefined;
+  currentPeriod: number | undefined;
+  currentSeason: number | undefined;
+  currentVisualDayInSeason: number | undefined;
+  currentVisualPeriod: number | undefined;
+  currentVisualSeason: number | undefined;
+  currentYear: number | undefined;
+  dayTime: number | undefined;
+  daysPerPeriod: number | undefined;
+  forecast: Array<WebsocketForecast>;
+};
+
+type WebsocketForecast = {
+  duration: number | undefined;
+  season: number | undefined;
+  type: number | undefined;
+  startDay: number | undefined;
+  startDayTime: number | undefined;
+  variationIndex: number | undefined;
+};
+
+type WebsocketPlaceableWrapper = {
+  placeables: Array<WebsocketPlaceable>;
+};
+
+type WebsocketPlaceable = {
+  name: string | undefined;
+  x: number | undefined;
+  y: number | undefined;
+  z: number | undefined;
+  farmId: number | undefined;
+  id: number | undefined;
+  price: number | undefined;
+  age: number | undefined;
+  sellPointId: number | undefined;
+  totalPaid: Array<WebsocketPlaceableFillTypeAmount> | undefined;
+  totalReceived: Array<WebsocketPlaceableFillTypeAmount> | undefined;
+  storage: Array<WebsocketPlaceableStorage> | undefined;
+};
+
+type WebsocketPlaceableStorage = {
+  capacity: number | undefined;
+  costsPerFillLevelAndDay: number | undefined;
+  fillLevels: Array<WebsocketPlaceableFilllevel>;
+};
+
+type WebsocketPlaceableFilllevel = {
+  fillType: number | undefined;
+  fillLevel: number | undefined;
+};
+
+type WebsocketPlaceableFillTypeAmount = {
+  fillType: number | undefined;
+  amount: number | undefined;
+};
+
+type WebsocketData = {
+  fieldData: WebsocketFieldWrapper | undefined;
+  playerData: WebsocketPlayerWrapper | undefined;
+  farmData: WebsocketFarmWrapper | undefined;
+  metadataData: WebsocketMetadataWrapper | undefined;
+  modsData: WebsocketModsWrapper | undefined;
+  missionsData: WebsocketMissionsWrapper | undefined;
+  economyData: WebsocketEconomyWrapper | undefined;
+  vehicleSalesData: WebsocketVehicleSalesWrapper | undefined;
+  vehiclesData: WebsocketVehiclesWrapper | undefined;
+  npcsData: WebsocketNPCsWrapper | undefined;
+  environmentData: WebsocketEnvironmentWrapper | undefined;
+  placeableData: WebsocketPlaceableWrapper | undefined;
 };

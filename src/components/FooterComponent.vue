@@ -2,7 +2,7 @@
   <footer class="mt-auto py-3 text-muted">
     <div class="text-center">
       Made by Unicorns. <font-awesome-icon :icon="['fad', 'unicorn']" />
-      <div class="small">{{ environment }}</div>
+      <div class="small">{{ environment }} | {{ version }}</div>
     </div>
   </footer>
 </template>
@@ -15,6 +15,9 @@ export default defineComponent({
   computed: {
     environment: function () {
       return process.env.NODE_ENV;
+    },
+    version: function () {
+      return process.env.PACKAGE_VERSION;
     },
   },
 });
