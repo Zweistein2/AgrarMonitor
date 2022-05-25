@@ -251,10 +251,11 @@ export default defineComponent({
   },
   props: {
     active: String,
-    environmentData: Object as PropType<EnvironmentData>,
+    environmentDataProp: Object as PropType<EnvironmentData>,
   },
   data: () => ({
     today: new Date(),
+    environmentData: {} as EnvironmentData,
   }),
   watch: {
     locale(): void {
@@ -269,6 +270,17 @@ export default defineComponent({
         },
       });
     },
+    environmentDataProp: {
+      handler: function (val) {
+        if (val !== undefined) {
+          this.environmentData = val;
+
+          this.updateTime();
+        }
+      },
+      deep: true,
+      immediate: true,
+    },
   },
   mounted() {
     if (this.active) {
@@ -279,34 +291,52 @@ export default defineComponent({
       }
     }
   },
-  beforeUpdate() {
-    if (
-      this.environmentData &&
-      this.environmentData.dayTime &&
-      this.environmentData.daysPerPeriod &&
-      this.environmentData.currentDay &&
-      this.environmentData.weather &&
-      this.environmentData.weather.forecast
-    ) {
-      let currentMonth =
-        Math.ceil(
-          this.environmentData.currentDay / this.environmentData.daysPerPeriod
-        ) % 12;
-      let currentDay =
-        ((this.environmentData.currentDay / this.environmentData.daysPerPeriod -
-          currentMonth +
-          1) *
-          this.environmentData.daysPerPeriod) %
-        12;
+  methods: {
+    updateTime(): void {
+      if (
+        this.environmentData &&
+        this.environmentData.daysPerPeriod &&
+        this.environmentData.currentDay &&
+        this.environmentData.weather &&
+        this.environmentData.weather.forecast
+      ) {
+        let currentMonth =
+          Math.ceil(
+            this.environmentData.currentDay / this.environmentData.daysPerPeriod
+          ) % 12;
+        let currentDay =
+          ((this.environmentData.currentDay /
+            this.environmentData.daysPerPeriod -
+            currentMonth +
+            1) *
+            this.environmentData.daysPerPeriod) %
+          12;
 
-      this.today = new Date(
-        1999,
-        currentMonth + 1,
-        currentDay,
-        ~~(this.environmentData.dayTime / 60),
-        ~~(this.environmentData.dayTime % 60)
-      );
-    }
+        if (
+          this.environmentData.dayTimeHour !== undefined &&
+          this.environmentData.dayTimeMinutes !== undefined
+        ) {
+          this.today = new Date(
+            1999,
+            currentMonth + 1,
+            currentDay,
+            this.environmentData.dayTimeHour,
+            this.environmentData.dayTimeMinutes
+          );
+        } else if (this.environmentData.dayTime !== undefined) {
+          this.today = new Date(
+            1999,
+            currentMonth + 1,
+            currentDay,
+            ~~(this.environmentData.dayTime / 60),
+            ~~(this.environmentData.dayTime % 60)
+          );
+        }
+      }
+    },
+  },
+  beforeUpdate() {
+    this.updateTime();
   },
 });
 </script>

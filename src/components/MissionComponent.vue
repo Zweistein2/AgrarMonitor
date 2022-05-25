@@ -2,7 +2,7 @@
   <div
     class="accordion accordion-flush"
     id="vehicleAccordion"
-    v-if="missionData !== undefined"
+    v-if="missionData !== undefined && placeablesData !== undefined"
   >
     <div
       class="accordion-item"
@@ -78,11 +78,17 @@
                     {{ $t("expectedLitres") }}
                   </th>
                   <th scope="col">
+                    {{ $t("depositedLitres") }}
+                  </th>
+                  <th scope="col">
                     {{ $t("target") }}
                   </th>
                 </template>
+                <th scope="col">
+                  {{ $t("missionprogress") }}
+                </th>
               </tr>
-              <tr v-for="mission in category[1]" :key="mission.activeId">
+              <tr v-for="(mission, index) in category[1]" :key="index">
                 <th scope="row" v-if="mission.type !== 'supplyTransport'">
                   {{ $t("field") + " " + mission.field.id }}
                 </th>
@@ -215,6 +221,12 @@
                   <td>
                     {{ $n(mission.delivery.expectedLiters, "liter") }}
                   </td>
+                  <td v-if="mission.delivery.depositedLiters">
+                    {{ $n(mission.delivery.depositedLiters, "liter") }}
+                  </td>
+                  <td v-else>
+                    {{ $n(0, "liter") }}
+                  </td>
                   <td
                     v-if="
                       placeablesData !== undefined &&
@@ -237,6 +249,41 @@
                     {{ $t("UNKNOWN") }}
                   </td>
                 </template>
+                <td v-if="mission.completion">
+                  <div class="progress">
+                    <div
+                      class="progress-bar progress-bar-striped"
+                      :id="
+                        'progressMission_' +
+                        index +
+                        '_Amount_' +
+                        mission.completion
+                      "
+                      role="progressbar"
+                      :style="'width: ' + mission.completion + '%'"
+                      :aria-valuenow="mission.completion"
+                      aria-valuemin="0"
+                      aria-valuemax="100"
+                    >
+                      {{ Math.round(mission.completion) + "%" }}
+                    </div>
+                  </div>
+                </td>
+                <td v-else>
+                  <div class="progress">
+                    <div
+                      class="progress-bar progress-bar-striped"
+                      :id="'progressMission_' + index + '_Amount_0'"
+                      role="progressbar"
+                      style="width: 0"
+                      aria-valuenow="0"
+                      aria-valuemin="0"
+                      aria-valuemax="100"
+                    >
+                      "0%"
+                    </div>
+                  </div>
+                </td>
               </tr>
             </tbody>
           </table>
@@ -254,11 +301,45 @@ export default defineComponent({
   name: "MissionComponent",
   data: () => ({
     missionsPerCategory: new Map<string, Array<Mission>>(),
+    farmsData: {} as FarmsData,
+    missionData: {} as MissionsData,
+    placeablesData: {} as PlaceableData,
   }),
   props: {
-    farmsData: Object as PropType<FarmsData>,
-    missionData: Object as PropType<MissionsData>,
-    placeablesData: Object as PropType<PlaceableData>,
+    farmsDataProp: Object as PropType<FarmsData>,
+    missionDataProp: Object as PropType<MissionsData>,
+    placeablesDataProp: Object as PropType<PlaceableData>,
+  },
+  watch: {
+    farmsDataProp: {
+      handler: function (val) {
+        if (val !== undefined) {
+          this.farmsData = val;
+        }
+      },
+      deep: true,
+      immediate: true,
+    },
+    missionDataProp: {
+      handler: function (val) {
+        if (val !== undefined) {
+          this.missionData = val;
+
+          this.updateMissions();
+        }
+      },
+      deep: true,
+      immediate: true,
+    },
+    placeablesDataProp: {
+      handler: function (val) {
+        if (val !== undefined) {
+          this.placeablesData = val;
+        }
+      },
+      deep: true,
+      immediate: true,
+    },
   },
   methods: {
     iconSrc: function (name: string): string {
@@ -268,39 +349,49 @@ export default defineComponent({
         return require("@/assets/icons/AIR.png");
       }
     },
-    getPlaceableNameByMap(placeableName: string, defaultValue: string): string {
+    getPlaceableNameByMap(
+      placeableName: string | undefined,
+      defaultValue: string
+    ): string {
+      if (placeableName === undefined) {
+        return defaultValue;
+      }
+
       return nameMappingService.getPlaceableNameByMap(
         placeableName,
         defaultValue
       );
     },
-  },
-  beforeUpdate() {
-    this.missionsPerCategory = new Map<string, Array<Mission>>();
+    updateMissions() {
+      this.missionsPerCategory = new Map<string, Array<Mission>>();
 
-    if (
-      this.missionData &&
-      this.missionData.mission &&
-      this.missionData.mission.length > 0
-    ) {
-      for (let mission of this.missionData.mission) {
-        if (mission && mission.type) {
-          let existingData = this.missionsPerCategory.get(mission.type);
+      if (
+        this.missionData &&
+        this.missionData.mission &&
+        this.missionData.mission.length > 0
+      ) {
+        for (let mission of this.missionData.mission) {
+          if (mission && mission.type) {
+            let existingData = this.missionsPerCategory.get(mission.type);
 
-          if (existingData) {
-            this.missionsPerCategory.set(
-              mission.type,
-              existingData.concat(Array<Mission>(mission))
-            );
-          } else {
-            this.missionsPerCategory.set(
-              mission.type,
-              new Array<Mission>(mission)
-            );
+            if (existingData) {
+              this.missionsPerCategory.set(
+                mission.type,
+                existingData.concat(Array<Mission>(mission))
+              );
+            } else {
+              this.missionsPerCategory.set(
+                mission.type,
+                new Array<Mission>(mission)
+              );
+            }
           }
         }
       }
-    }
+    },
+  },
+  beforeUpdate() {
+    this.updateMissions();
   },
 });
 </script>

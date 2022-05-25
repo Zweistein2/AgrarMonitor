@@ -8,6 +8,7 @@
             :meta-data-prop="metaData"
             :vehicle-data-prop="vehicleData"
             :farms-data-prop="farmsData"
+            :player-data-prop="playerData"
             :show-fields="false"
             :show-vehicles="true"
           />
@@ -458,9 +459,7 @@
           </h5>
         </div>
         <div class="card-body collapse" id="environment">
-          <div class="row row-cols-6">
-            <forecastComponent :environment-data="environmentData" />
-          </div>
+          <forecastComponent :environment-data-prop="environmentData" />
         </div>
       </div>
     </div>
@@ -523,12 +522,13 @@ export default defineComponent({
     mapComponent: MapComponent,
   },
   props: {
-    economyData: Object as PropType<EconomyData>,
-    vehicleData: Object as PropType<VehicleData>,
-    farmsData: Object as PropType<FarmsData>,
-    metaData: Object as PropType<MetaData>,
-    environmentData: Object as PropType<EnvironmentData>,
-    salesData: Object as PropType<SalesData>,
+    economyDataProp: Object as PropType<EconomyData>,
+    vehicleDataProp: Object as PropType<VehicleData>,
+    farmsDataProp: Object as PropType<FarmsData>,
+    metaDataProp: Object as PropType<MetaData>,
+    environmentDataProp: Object as PropType<EnvironmentData>,
+    salesDataProp: Object as PropType<SalesData>,
+    playerDataProp: Object as PropType<PlayerData>,
   },
   data: () => ({
     today: new Date(),
@@ -545,6 +545,13 @@ export default defineComponent({
     } as FillType,
     masonry: {} as Masonry,
     masonryScript: {} as HTMLScriptElement,
+    economyData: {} as EconomyData,
+    vehicleData: {} as VehicleData,
+    farmsData: {} as FarmsData,
+    metaData: {} as MetaData,
+    environmentData: {} as EnvironmentData,
+    salesData: {} as SalesData,
+    playerData: {} as PlayerData,
   }),
   computed: {
     locale() {
@@ -552,6 +559,15 @@ export default defineComponent({
     },
   },
   watch: {
+    economyDataProp: {
+      handler: function (val) {
+        if (val !== undefined) {
+          this.economyData = val;
+        }
+      },
+      deep: true,
+      immediate: true,
+    },
     economyData: function () {
       if (
         this.economyData &&
@@ -561,6 +577,62 @@ export default defineComponent({
       ) {
         this.selectedFillType = this.economyData.fillTypes.fillType[1];
       }
+    },
+    vehicleDataProp: {
+      handler: function (val) {
+        if (val !== undefined) {
+          this.vehicleData = val;
+        }
+      },
+      deep: true,
+      immediate: true,
+    },
+    farmsDataProp: {
+      handler: function (val) {
+        if (val !== undefined) {
+          this.farmsData = val;
+        }
+      },
+      deep: true,
+      immediate: true,
+    },
+    metaDataProp: {
+      handler: function (val) {
+        if (val !== undefined) {
+          this.metaData = val;
+        }
+      },
+      deep: true,
+      immediate: true,
+    },
+    environmentDataProp: {
+      handler: function (val) {
+        if (val !== undefined) {
+          this.environmentData = val;
+
+          this.updateTime();
+        }
+      },
+      deep: true,
+      immediate: true,
+    },
+    salesDataProp: {
+      handler: function (val) {
+        if (val !== undefined) {
+          this.salesData = val;
+        }
+      },
+      deep: true,
+      immediate: true,
+    },
+    playerDataProp: {
+      handler: function (val) {
+        if (val !== undefined) {
+          this.playerData = val;
+        }
+      },
+      deep: true,
+      immediate: true,
     },
   },
   methods: {
@@ -605,35 +677,51 @@ export default defineComponent({
 
       return "rgba(255, 255, 255, 0.3)";
     },
+    updateTime(): void {
+      if (
+        this.environmentData &&
+        this.environmentData.daysPerPeriod &&
+        this.environmentData.currentDay &&
+        this.environmentData.weather &&
+        this.environmentData.weather.forecast
+      ) {
+        let currentMonth =
+          Math.ceil(
+            this.environmentData.currentDay / this.environmentData.daysPerPeriod
+          ) % 12;
+        let currentDay =
+          ((this.environmentData.currentDay /
+            this.environmentData.daysPerPeriod -
+            currentMonth +
+            1) *
+            this.environmentData.daysPerPeriod) %
+          12;
+
+        if (
+          this.environmentData.dayTimeHour !== undefined &&
+          this.environmentData.dayTimeMinutes !== undefined
+        ) {
+          this.today = new Date(
+            1999,
+            currentMonth + 1,
+            currentDay,
+            this.environmentData.dayTimeHour,
+            this.environmentData.dayTimeMinutes
+          );
+        } else if (this.environmentData.dayTime !== undefined) {
+          this.today = new Date(
+            1999,
+            currentMonth + 1,
+            currentDay,
+            ~~(this.environmentData.dayTime / 60),
+            ~~(this.environmentData.dayTime % 60)
+          );
+        }
+      }
+    },
   },
   beforeUpdate(): void {
-    if (
-      this.environmentData &&
-      this.environmentData.dayTime &&
-      this.environmentData.daysPerPeriod &&
-      this.environmentData.currentDay &&
-      this.environmentData.weather &&
-      this.environmentData.weather.forecast
-    ) {
-      let currentMonth =
-        Math.ceil(
-          this.environmentData.currentDay / this.environmentData.daysPerPeriod
-        ) % 12;
-      let currentDay =
-        ((this.environmentData.currentDay / this.environmentData.daysPerPeriod -
-          currentMonth +
-          1) *
-          this.environmentData.daysPerPeriod) %
-        12;
-
-      this.today = new Date(
-        1999,
-        currentMonth + 1,
-        currentDay,
-        ~~(this.environmentData.dayTime / 60),
-        ~~(this.environmentData.dayTime % 60)
-      );
-    }
+    this.updateTime();
   },
   mounted(): void {
     if (this.masonryScript.id === undefined) {

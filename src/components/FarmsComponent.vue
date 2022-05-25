@@ -745,8 +745,22 @@ import farmsMap from "@/utils/farms";
 
 export default defineComponent({
   name: "farmsComponent",
+  data: () => ({
+    farmsData: {} as FarmsData,
+  }),
   props: {
-    farmsData: Object as PropType<FarmsData>,
+    farmsDataProp: Object as PropType<FarmsData>,
+  },
+  watch: {
+    farmsDataProp: {
+      handler: function (val) {
+        if (val !== undefined) {
+          this.farmsData = val;
+        }
+      },
+      deep: true,
+      immediate: true,
+    },
   },
   computed: {
     highestPlayerAmount: function () {

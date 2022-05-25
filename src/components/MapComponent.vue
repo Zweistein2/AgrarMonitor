@@ -20,6 +20,7 @@ export default defineComponent({
     vehicleDataProp: Object as PropType<VehicleData>,
     metaDataProp: Object as PropType<MetaData>,
     farmsDataProp: Object as PropType<FarmsData>,
+    playerDataProp: Object as PropType<PlayerData>,
     mapName: String,
     showVehicles: Boolean,
     showFields: Boolean,
@@ -37,6 +38,9 @@ export default defineComponent({
     nfmarschMap() {
       return require("@/mods/FS22_NF_Marsch_4fach_oG/assets/nfmarsch.png");
     },
+    lkhroMap() {
+      return require("@/mods/FS22_Lk_HRO_4fach/assets/lkhro.png");
+    },
   },
   data: () => ({
     selectedMapName: "Elmcreek" as string,
@@ -47,6 +51,7 @@ export default defineComponent({
     vehicleData: {} as VehicleData,
     farmsData: {} as FarmsData,
     metaData: {} as MetaData,
+    playerData: {} as PlayerData,
     fontawesomeScript: {} as HTMLScriptElement,
   }),
   watch: {
@@ -74,6 +79,17 @@ export default defineComponent({
       handler: function (val) {
         if (val !== undefined) {
           this.farmsData = val;
+        }
+      },
+      deep: true,
+      immediate: true,
+    },
+    playerDataProp: {
+      handler: function (val) {
+        if (val !== undefined) {
+          this.playerData = val;
+
+          this.updateMarkers();
         }
       },
       deep: true,
@@ -173,6 +189,61 @@ export default defineComponent({
                 ).bindTooltip(name)
               );
             }
+          }
+        }
+      }
+    },
+    addPlayerMarkers: function (map: L.Map) {
+      if (
+        this.playerData &&
+        this.playerData.players &&
+        this.playerData.players.length > 0
+      ) {
+        for (let player of this.playerData.players) {
+          if (
+            player.x !== undefined &&
+            player.y !== undefined &&
+            player.y !== -200 &&
+            player.z !== undefined &&
+            player.name !== undefined &&
+            player.farmId !== undefined
+          ) {
+            let color = "#000080";
+
+            if (
+              this.farmsData !== undefined &&
+              this.farmsData.farm !== undefined
+            ) {
+              for (let farm of this.farmsData.farm) {
+                if (farm.farmId === player.farmId && farm.color !== undefined) {
+                  let farmColor = farmsMap.get(farm.color);
+
+                  if (farmColor) {
+                    color = farmColor[0];
+                  }
+                }
+              }
+            }
+
+            map.addLayer(
+              L.marker(
+                L.latLng(
+                  player.z * this.mapFactor * -1,
+                  player.x * this.mapFactor
+                ),
+                {
+                  icon: L.divIcon({
+                    html: `<span class="fa-stack fa-2x"><i class="fa-solid fa-location-pin fa-stack-2x" style="color: ${color};"></i><i class="fa-solid fa-user-cowboy fa-inverse fa-stack-1x fa-xs" style="margin-top: -7px;"></i></span>`,
+                    className: "defaultMarker",
+                    iconSize: [60, 48],
+                    iconAnchor: [30, 48],
+                    popupAnchor: [30, 0],
+                    tooltipAnchor: [0, -30],
+                  }),
+                  riseOnHover: true,
+                }
+              ).bindTooltip(player.name)
+            );
           }
         }
       }
@@ -277,11 +348,19 @@ export default defineComponent({
       ) {
         this.mapFactor = 2048 / 5120;
         map.addLayer(L.imageOverlay(this.nfmarschMap, this.bounds));
+      } else if (
+        this.selectedMapName === "LkHRO" ||
+        this.selectedMapName === "LkHRO 4fach" ||
+        this.selectedMapName === "Landkreis Rostock"
+      ) {
+        this.mapFactor = 2048 / 5120;
+        map.addLayer(L.imageOverlay(this.lkhroMap, this.bounds));
       } else {
         map.addLayer(L.imageOverlay(this.elmcreekMap, this.bounds));
       }
 
       if (this.showVehicles) {
+        this.addPlayerMarkers(map);
         this.addVehicleMarkers(map);
       }
       if (this.showFields) {

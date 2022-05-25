@@ -211,12 +211,37 @@ import vehicleMap from "@/utils/vehicles";
 export default defineComponent({
   name: "VehicleComponent",
   props: {
-    farmsData: Object as PropType<FarmsData>,
-    vehicleData: Object as PropType<VehicleData>,
+    farmsDataProp: Object as PropType<FarmsData>,
+    vehicleDataProp: Object as PropType<VehicleData>,
   },
   data: () => ({
     vehicleFillData: new Map<number, Map<string, Array<VehicleFillState>>>(),
+    farmsData: {} as FarmsData,
+    vehicleData: {} as VehicleData,
   }),
+  watch: {
+    farmsDataProp: {
+      handler: function (val) {
+        if (val !== undefined) {
+          this.farmsData = val;
+        }
+      },
+      deep: true,
+      immediate: true,
+    },
+    vehicleDataProp: {
+      handler: function (val) {
+        if (val !== undefined) {
+          this.vehicleData = val;
+
+          this.updateVehicleData();
+          this.updateMixerWagonData();
+        }
+      },
+      deep: true,
+      immediate: true,
+    },
+  },
   methods: {
     iconSrc: function (name: string): string {
       try {
@@ -238,6 +263,291 @@ export default defineComponent({
         return arr.set(key, value);
       }
     },
+    updateVehicleData: function () {
+      if (
+        this.vehicleData &&
+        this.vehicleData.vehicle &&
+        this.vehicleData.vehicle.length > 0
+      ) {
+        let mappedFillStatesNotDistinct: Array<
+          Map<number, Map<string, VehicleFillState>>
+        > = this.vehicleData.vehicle.map((vehicle) => {
+          if (vehicle.farmId && vehicle.farmId > 0) {
+            if (vehicle.filename) {
+              let brand = nameMappingService.getVehicleBrandByMap(
+                vehicle.filename,
+                ""
+              );
+              let name = nameMappingService.getVehicleNameByMap(
+                vehicle.filename,
+                "UNKNOWN"
+              );
+
+              if (brand !== "") {
+                name = brand.concat(" ").concat(name);
+              }
+              let fillStates = new Map<string, number>();
+
+              if (vehicle.fillUnit && vehicle.fillUnit.unit) {
+                for (let i = 0; i < vehicle.fillUnit.unit.length; i++) {
+                  let type = vehicle.fillUnit.unit[i].fillType;
+                  let level = vehicle.fillUnit.unit[i].fillLevel;
+
+                  if (type && level && type !== "UNKNOWN" && type !== "AIR") {
+                    fillStates.set(type, level);
+                  }
+                }
+              } else if (
+                vehicle.mixerWagon &&
+                vehicle.mixerWagon.fillType &&
+                vehicle.mixerWagon.fillType.length == 4
+              ) {
+                let hay = vehicle.mixerWagon.fillType[0].fillLevel
+                  ? Number.parseFloat(vehicle.mixerWagon.fillType[0].fillLevel)
+                  : 0;
+                let silage = vehicle.mixerWagon.fillType[1].fillLevel
+                  ? Number.parseFloat(vehicle.mixerWagon.fillType[1].fillLevel)
+                  : 0;
+                let straw = vehicle.mixerWagon.fillType[2].fillLevel
+                  ? Number.parseFloat(vehicle.mixerWagon.fillType[2].fillLevel)
+                  : 0;
+                let mineralfeed = vehicle.mixerWagon.fillType[3].fillLevel
+                  ? Number.parseFloat(vehicle.mixerWagon.fillType[3].fillLevel)
+                  : 0;
+
+                let total = hay + silage + straw + mineralfeed;
+
+                let hayPercentage = (hay / total) * 100;
+                let silagePercentage = (silage / total) * 100;
+                let strawPercentage = (straw / total) * 100;
+                let mineralfeedPercentage = (mineralfeed / total) * 100;
+
+                if (
+                  hayPercentage >= 20 &&
+                  hayPercentage <= 75 &&
+                  silagePercentage >= 20 &&
+                  silagePercentage <= 75 &&
+                  strawPercentage >= 0 &&
+                  strawPercentage <= 30 &&
+                  mineralfeedPercentage >= 0 &&
+                  mineralfeedPercentage <= 7
+                ) {
+                  fillStates.set("FORAGE", total);
+                  fillStates.set("DRYGRASS", hay);
+                  fillStates.set("SILAGE", silage);
+                  fillStates.set("STRAW", straw);
+                  fillStates.set("MINERAL_FEED", mineralfeed);
+                } else {
+                  fillStates.set("FORAGE_MIXING", total);
+                  fillStates.set("DRYGRASS", hay);
+                  fillStates.set("SILAGE", silage);
+                  fillStates.set("STRAW", straw);
+                  fillStates.set("MINERAL_FEED", mineralfeed);
+                }
+              }
+
+              let vehicleFillStates = new Map<string, VehicleFillState>([
+                [
+                  nameMappingService.getVehicleCategoryByMap(
+                    vehicle.filename,
+                    "UNKNOWN"
+                  ) as string,
+                  { name, fillStates } as VehicleFillState,
+                ],
+              ]);
+
+              return new Map<number, Map<string, VehicleFillState>>([
+                [vehicle.farmId, vehicleFillStates],
+              ]);
+            } else {
+              let vehicleFillStates = new Map<string, VehicleFillState>([
+                [
+                  "",
+                  {
+                    name: "",
+                    fillStates: new Map<string, number>(),
+                  } as VehicleFillState,
+                ],
+              ]);
+
+              return new Map<number, Map<string, VehicleFillState>>([
+                [vehicle.farmId, vehicleFillStates],
+              ]);
+            }
+          } else {
+            return new Map<number, Map<string, VehicleFillState>>([
+              [-1, new Map<string, VehicleFillState>()],
+            ]);
+          }
+        });
+
+        this.vehicleFillData = new Map<
+          number,
+          Map<string, Array<VehicleFillState>>
+        >();
+
+        mappedFillStatesNotDistinct.forEach((value) =>
+          value.forEach((value: Map<string, VehicleFillState>, key: number) => {
+            let farmId = key;
+
+            if (farmId > 0) {
+              value.forEach((value: VehicleFillState, key: string) => {
+                if (value.fillStates.size > 0) {
+                  let existingData = this.vehicleFillData.get(farmId);
+
+                  if (existingData) {
+                    this.vehicleFillData.set(
+                      farmId,
+                      this.mergeArray(
+                        existingData,
+                        key,
+                        new Array<VehicleFillState>(value)
+                      )
+                    );
+                  } else {
+                    let vehicleFillStates = new Map<
+                      string,
+                      Array<VehicleFillState>
+                    >();
+
+                    vehicleFillStates = this.mergeArray(
+                      vehicleFillStates,
+                      key,
+                      new Array<VehicleFillState>(value)
+                    );
+
+                    this.vehicleFillData.set(farmId, vehicleFillStates);
+                  }
+                }
+              });
+            }
+          })
+        );
+      }
+    },
+    updateMixerWagonData: function () {
+      if (
+        this.vehicleData &&
+        this.vehicleData.vehicle &&
+        this.vehicleData.vehicle.length > 0
+      ) {
+        this.vehicleData.vehicle.forEach((vehicle) => {
+          if (vehicle.farmId && vehicle.farmId > 0) {
+            if (vehicle.filename) {
+              if (
+                vehicle.mixerWagon &&
+                vehicle.mixerWagon.fillType &&
+                vehicle.mixerWagon.fillType.length == 4
+              ) {
+                let hay = vehicle.mixerWagon.fillType[0].fillLevel
+                  ? Number.parseFloat(vehicle.mixerWagon.fillType[0].fillLevel)
+                  : 0;
+                let silage = vehicle.mixerWagon.fillType[1].fillLevel
+                  ? Number.parseFloat(vehicle.mixerWagon.fillType[1].fillLevel)
+                  : 0;
+                let straw = vehicle.mixerWagon.fillType[2].fillLevel
+                  ? Number.parseFloat(vehicle.mixerWagon.fillType[2].fillLevel)
+                  : 0;
+                let mineralfeed = vehicle.mixerWagon.fillType[3].fillLevel
+                  ? Number.parseFloat(vehicle.mixerWagon.fillType[3].fillLevel)
+                  : 0;
+
+                let total = hay + silage + straw + mineralfeed;
+
+                let hayPercentage = (hay / total) * 100;
+                let silagePercentage = (silage / total) * 100;
+                let strawPercentage = (straw / total) * 100;
+                let mineralfeedPercentage = (mineralfeed / total) * 100;
+
+                let hayProgress = document.getElementById(
+                  "progressFilltype_DRYGRASS_Amount_" + hay
+                );
+                let silageProgress = document.getElementById(
+                  "progressFilltype_SILAGE_Amount_" + silage
+                );
+                let strawProgress = document.getElementById(
+                  "progressFilltype_STRAW_Amount_" + straw
+                );
+                let mineralfeedProgress = document.getElementById(
+                  "progressFilltype_MINERAL_FEED_Amount_" + mineralfeed
+                );
+                if (hayProgress) {
+                  hayProgress.setAttribute(
+                    "aria-valuenow",
+                    hayPercentage.toString()
+                  );
+                  hayProgress.setAttribute(
+                    "style",
+                    "width: " + hayPercentage.toString() + "%"
+                  );
+                  hayProgress.textContent =
+                    Math.round(hayPercentage).toString() + "%";
+                  if (hayPercentage >= 20 && hayPercentage <= 75) {
+                    hayProgress.classList.add("bg-success");
+                  } else {
+                    hayProgress.classList.add("bg-danger");
+                  }
+                }
+                if (silageProgress) {
+                  silageProgress.setAttribute(
+                    "aria-valuenow",
+                    silagePercentage.toString()
+                  );
+                  silageProgress.setAttribute(
+                    "style",
+                    "width: " + silagePercentage.toString() + "%"
+                  );
+                  silageProgress.textContent =
+                    Math.round(silagePercentage).toString() + "%";
+                  if (silagePercentage >= 20 && silagePercentage <= 75) {
+                    silageProgress.classList.add("bg-success");
+                  } else {
+                    silageProgress.classList.add("bg-danger");
+                  }
+                }
+                if (strawProgress) {
+                  strawProgress.setAttribute(
+                    "aria-valuenow",
+                    strawPercentage.toString()
+                  );
+                  strawProgress.setAttribute(
+                    "style",
+                    "width: " + strawPercentage.toString() + "%"
+                  );
+                  strawProgress.textContent =
+                    Math.round(strawPercentage).toString() + "%";
+                  if (strawPercentage >= 0 && strawPercentage <= 30) {
+                    strawProgress.classList.add("bg-success");
+                  } else {
+                    strawProgress.classList.add("bg-danger");
+                  }
+                }
+                if (mineralfeedProgress) {
+                  mineralfeedProgress.setAttribute(
+                    "aria-valuenow",
+                    mineralfeedPercentage.toString()
+                  );
+                  mineralfeedProgress.setAttribute(
+                    "style",
+                    "width: " + mineralfeedPercentage.toString() + "%"
+                  );
+                  mineralfeedProgress.textContent =
+                    Math.round(mineralfeedPercentage).toString() + "%";
+                  if (
+                    mineralfeedPercentage >= 0 &&
+                    mineralfeedPercentage <= 7
+                  ) {
+                    mineralfeedProgress.classList.add("bg-success");
+                  } else {
+                    mineralfeedProgress.classList.add("bg-danger");
+                  }
+                }
+              }
+            }
+          }
+        });
+      }
+    },
   },
   beforeUpdate(): void {
     let categories = Array<string>();
@@ -248,278 +558,10 @@ export default defineComponent({
       }
     }
 
-    if (this.vehicleData) {
-      let mappedFillStatesNotDistinct: Array<
-        Map<number, Map<string, VehicleFillState>>
-      > = this.vehicleData.vehicle.map((vehicle) => {
-        if (vehicle.farmId && vehicle.farmId > 0) {
-          if (vehicle.filename) {
-            let brand = nameMappingService.getVehicleBrandByMap(
-              vehicle.filename,
-              ""
-            );
-            let name = nameMappingService.getVehicleNameByMap(
-              vehicle.filename,
-              "UNKNOWN"
-            );
-
-            if (brand !== "") {
-              name = brand.concat(" ").concat(name);
-            }
-            let fillStates = new Map<string, number>();
-
-            if (vehicle.fillUnit && vehicle.fillUnit.unit) {
-              for (let i = 0; i < vehicle.fillUnit.unit.length; i++) {
-                let type = vehicle.fillUnit.unit[i].fillType;
-                let level = vehicle.fillUnit.unit[i].fillLevel;
-
-                if (type && level && type !== "UNKNOWN" && type !== "AIR") {
-                  fillStates.set(type, level);
-                }
-              }
-            } else if (
-              vehicle.mixerWagon &&
-              vehicle.mixerWagon.fillType &&
-              vehicle.mixerWagon.fillType.length == 4
-            ) {
-              let hay = vehicle.mixerWagon.fillType[0].fillLevel
-                ? Number.parseFloat(vehicle.mixerWagon.fillType[0].fillLevel)
-                : 0;
-              let silage = vehicle.mixerWagon.fillType[1].fillLevel
-                ? Number.parseFloat(vehicle.mixerWagon.fillType[1].fillLevel)
-                : 0;
-              let straw = vehicle.mixerWagon.fillType[2].fillLevel
-                ? Number.parseFloat(vehicle.mixerWagon.fillType[2].fillLevel)
-                : 0;
-              let mineralfeed = vehicle.mixerWagon.fillType[3].fillLevel
-                ? Number.parseFloat(vehicle.mixerWagon.fillType[3].fillLevel)
-                : 0;
-
-              let total = hay + silage + straw + mineralfeed;
-
-              let hayPercentage = (hay / total) * 100;
-              let silagePercentage = (silage / total) * 100;
-              let strawPercentage = (straw / total) * 100;
-              let mineralfeedPercentage = (mineralfeed / total) * 100;
-
-              if (
-                hayPercentage >= 20 &&
-                hayPercentage <= 75 &&
-                silagePercentage >= 20 &&
-                silagePercentage <= 75 &&
-                strawPercentage >= 0 &&
-                strawPercentage <= 30 &&
-                mineralfeedPercentage >= 0 &&
-                mineralfeedPercentage <= 7
-              ) {
-                fillStates.set("FORAGE", total);
-                fillStates.set("DRYGRASS", hay);
-                fillStates.set("SILAGE", silage);
-                fillStates.set("STRAW", straw);
-                fillStates.set("MINERAL_FEED", mineralfeed);
-              } else {
-                fillStates.set("FORAGE_MIXING", total);
-                fillStates.set("DRYGRASS", hay);
-                fillStates.set("SILAGE", silage);
-                fillStates.set("STRAW", straw);
-                fillStates.set("MINERAL_FEED", mineralfeed);
-              }
-            }
-
-            let vehicleFillStates = new Map<string, VehicleFillState>([
-              [
-                nameMappingService.getVehicleCategoryByMap(
-                  vehicle.filename,
-                  "UNKNOWN"
-                ) as string,
-                { name, fillStates } as VehicleFillState,
-              ],
-            ]);
-
-            return new Map<number, Map<string, VehicleFillState>>([
-              [vehicle.farmId, vehicleFillStates],
-            ]);
-          } else {
-            let vehicleFillStates = new Map<string, VehicleFillState>([
-              [
-                "",
-                {
-                  name: "",
-                  fillStates: new Map<string, number>(),
-                } as VehicleFillState,
-              ],
-            ]);
-
-            return new Map<number, Map<string, VehicleFillState>>([
-              [vehicle.farmId, vehicleFillStates],
-            ]);
-          }
-        } else {
-          return new Map<number, Map<string, VehicleFillState>>([
-            [-1, new Map<string, VehicleFillState>()],
-          ]);
-        }
-      });
-
-      this.vehicleFillData = new Map<
-        number,
-        Map<string, Array<VehicleFillState>>
-      >();
-
-      mappedFillStatesNotDistinct.forEach((value) =>
-        value.forEach((value: Map<string, VehicleFillState>, key: number) => {
-          let farmId = key;
-
-          if (farmId > 0) {
-            value.forEach((value: VehicleFillState, key: string) => {
-              if (value.fillStates.size > 0) {
-                let existingData = this.vehicleFillData.get(farmId);
-
-                if (existingData) {
-                  this.vehicleFillData.set(
-                    farmId,
-                    this.mergeArray(
-                      existingData,
-                      key,
-                      new Array<VehicleFillState>(value)
-                    )
-                  );
-                } else {
-                  let vehicleFillStates = new Map<
-                    string,
-                    Array<VehicleFillState>
-                  >();
-
-                  vehicleFillStates = this.mergeArray(
-                    vehicleFillStates,
-                    key,
-                    new Array<VehicleFillState>(value)
-                  );
-
-                  this.vehicleFillData.set(farmId, vehicleFillStates);
-                }
-              }
-            });
-          }
-        })
-      );
-    }
+    this.updateVehicleData();
   },
   updated() {
-    if (this.vehicleData) {
-      this.vehicleData.vehicle.forEach((vehicle) => {
-        if (vehicle.farmId && vehicle.farmId > 0) {
-          if (vehicle.filename) {
-            if (
-              vehicle.mixerWagon &&
-              vehicle.mixerWagon.fillType &&
-              vehicle.mixerWagon.fillType.length == 4
-            ) {
-              let hay = vehicle.mixerWagon.fillType[0].fillLevel
-                ? Number.parseFloat(vehicle.mixerWagon.fillType[0].fillLevel)
-                : 0;
-              let silage = vehicle.mixerWagon.fillType[1].fillLevel
-                ? Number.parseFloat(vehicle.mixerWagon.fillType[1].fillLevel)
-                : 0;
-              let straw = vehicle.mixerWagon.fillType[2].fillLevel
-                ? Number.parseFloat(vehicle.mixerWagon.fillType[2].fillLevel)
-                : 0;
-              let mineralfeed = vehicle.mixerWagon.fillType[3].fillLevel
-                ? Number.parseFloat(vehicle.mixerWagon.fillType[3].fillLevel)
-                : 0;
-
-              let total = hay + silage + straw + mineralfeed;
-
-              let hayPercentage = (hay / total) * 100;
-              let silagePercentage = (silage / total) * 100;
-              let strawPercentage = (straw / total) * 100;
-              let mineralfeedPercentage = (mineralfeed / total) * 100;
-
-              let hayProgress = document.getElementById(
-                "progressFilltype_DRYGRASS_Amount_" + hay
-              );
-              let silageProgress = document.getElementById(
-                "progressFilltype_SILAGE_Amount_" + silage
-              );
-              let strawProgress = document.getElementById(
-                "progressFilltype_STRAW_Amount_" + straw
-              );
-              let mineralfeedProgress = document.getElementById(
-                "progressFilltype_MINERAL_FEED_Amount_" + mineralfeed
-              );
-              if (hayProgress) {
-                hayProgress.setAttribute(
-                  "aria-valuenow",
-                  hayPercentage.toString()
-                );
-                hayProgress.setAttribute(
-                  "style",
-                  "width: " + hayPercentage.toString() + "%"
-                );
-                hayProgress.textContent =
-                  Math.round(hayPercentage).toString() + "%";
-                if (hayPercentage >= 20 && hayPercentage <= 75) {
-                  hayProgress.classList.add("bg-success");
-                } else {
-                  hayProgress.classList.add("bg-danger");
-                }
-              }
-              if (silageProgress) {
-                silageProgress.setAttribute(
-                  "aria-valuenow",
-                  silagePercentage.toString()
-                );
-                silageProgress.setAttribute(
-                  "style",
-                  "width: " + silagePercentage.toString() + "%"
-                );
-                silageProgress.textContent =
-                  Math.round(silagePercentage).toString() + "%";
-                if (silagePercentage >= 20 && silagePercentage <= 75) {
-                  silageProgress.classList.add("bg-success");
-                } else {
-                  silageProgress.classList.add("bg-danger");
-                }
-              }
-              if (strawProgress) {
-                strawProgress.setAttribute(
-                  "aria-valuenow",
-                  strawPercentage.toString()
-                );
-                strawProgress.setAttribute(
-                  "style",
-                  "width: " + strawPercentage.toString() + "%"
-                );
-                strawProgress.textContent =
-                  Math.round(strawPercentage).toString() + "%";
-                if (strawPercentage >= 0 && strawPercentage <= 30) {
-                  strawProgress.classList.add("bg-success");
-                } else {
-                  strawProgress.classList.add("bg-danger");
-                }
-              }
-              if (mineralfeedProgress) {
-                mineralfeedProgress.setAttribute(
-                  "aria-valuenow",
-                  mineralfeedPercentage.toString()
-                );
-                mineralfeedProgress.setAttribute(
-                  "style",
-                  "width: " + mineralfeedPercentage.toString() + "%"
-                );
-                mineralfeedProgress.textContent =
-                  Math.round(mineralfeedPercentage).toString() + "%";
-                if (mineralfeedPercentage >= 0 && mineralfeedPercentage <= 7) {
-                  mineralfeedProgress.classList.add("bg-success");
-                } else {
-                  mineralfeedProgress.classList.add("bg-danger");
-                }
-              }
-            }
-          }
-        }
-      });
-    }
+    this.updateMixerWagonData();
   },
 });
 </script>

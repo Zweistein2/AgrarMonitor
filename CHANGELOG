@@ -1,18 +1,24 @@
-[1.0.1]
-...In development...
-Done:
-- Live updates of vehicles, players
+[1.0.1] ...In development...
+- Multiplayer support
+- Live updates of storage, missions, vehicles (position and storage), players and weather
+- Mission progress
 - Show farms and players (and their permissions)
 - Ability to select savegame directly on the website
 - Added Dutch as language (Thanks to @SupremeClicker!)
-Planned:
-- Live updates of missions, weather and storage
-- Show max fill level on greenhouses
-- Categorize buildings under "storage"
-- Tests!
 
 Known bugs:
 - If a vehicle is bought or reset, then the live updates stop working/show incorrect data until the game is saved again
 
+Planned:
+- Show max fill level on greenhouses
+- Categorize buildings under "storage"
+- Ability to view (and edit) autodrive courses
+- Ability to see field states (stubble, fertilizer and so on)
+- Production chains, tips & tricks
+- Calculator enhancement (fertilizer usage, bonus and costs, bee bonus, and so on)
+- Darkmode
+- Used vehicle offers
+- Mod support (with config files?)
+- Tests!
 [1.0.0]
 - Initial Release

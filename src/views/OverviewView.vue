@@ -1,12 +1,13 @@
 <template>
-  <navbar active="overviewLink" :environment-data="environmentData" />
+  <navbar active="overviewLink" :environment-data-prop="environmentData" />
   <overviewComponent
-    :economy-data="economyData"
-    :vehicle-data="vehicleData"
-    :meta-data="metaData"
-    :environment-data="environmentData"
-    :sales-data="salesData"
-    :farms-data="farmsData"
+    :economy-data-prop="economyData"
+    :vehicle-data-prop="vehicleData"
+    :meta-data-prop="metaData"
+    :environment-data-prop="environmentData"
+    :sales-data-prop="salesData"
+    :farms-data-prop="farmsData"
+    :player-data-prop="playerData"
   />
 </template>
 
@@ -16,8 +17,7 @@ import OverviewComponent from "@/components/OverviewComponent.vue";
 import Navbar from "@/components/Navbar.vue";
 import dataService from "@/services/dataService";
 import router from "@/router";
-import VehicleComponent from "@/components/VehicleComponent.vue";
-import nameMappingService from "@/services/nameMappingService";
+import mappingService from "@/services/mappingService";
 
 export default defineComponent({
   name: "OverviewView",
@@ -32,6 +32,7 @@ export default defineComponent({
     environmentData: EnvironmentData;
     salesData: SalesData;
     farmsData: FarmsData;
+    playerData: PlayerData;
     websocketData: WebsocketData | undefined;
   } => ({
     economyData: {} as EconomyData,
@@ -40,114 +41,87 @@ export default defineComponent({
     environmentData: {} as EnvironmentData,
     salesData: {} as SalesData,
     farmsData: {} as FarmsData,
+    playerData: {} as PlayerData,
     websocketData: {} as WebsocketData,
   }),
   watch: {
-    websocketData: function (val) {
+    websocketData: async function (val) {
       if (val !== undefined) {
         let websocketData = val as WebsocketData;
 
+        if (websocketData.economyData) {
+          this.economyData = mappingService.mapEconomyData(
+            websocketData.economyData,
+            this.economyData
+          );
+        }
+
+        if (websocketData.vehiclesData && websocketData.vehiclesData.vehicles) {
+          this.vehicleData = mappingService.mapVehicleData(
+            websocketData.vehiclesData,
+            this.vehicleData
+          );
+        }
+
+        if (websocketData.metadataData && websocketData.farmData) {
+          this.metaData = mappingService.mapMetaData(
+            websocketData.metadataData,
+            websocketData.farmData,
+            this.metaData
+          );
+        }
+
+        if (websocketData.modsData) {
+          this.metaData = mappingService.mapModData(
+            websocketData.modsData,
+            this.metaData
+          );
+        }
+
+        if (websocketData.environmentData) {
+          this.environmentData = mappingService.mapEnvironmentData(
+            websocketData.environmentData,
+            this.environmentData
+          );
+        }
+
+        // SALES
+
+        if (websocketData.farmData) {
+          this.farmsData = mappingService.mapFarmData(
+            websocketData.farmData,
+            this.farmsData
+          );
+        }
+
+        if (websocketData.playerData) {
+          this.playerData = mappingService.mapPlayerData(
+            websocketData.playerData
+          );
+        }
+
         if (
-          websocketData.vehiclesData &&
-          websocketData.vehiclesData.vehicles &&
-          this.vehicleData &&
-          this.vehicleData.vehicle
+          websocketData.metadataData &&
+          websocketData.metadataData.metadata &&
+          websocketData.metadataData.metadata[0] &&
+          websocketData.metadataData.metadata[0].savegameIndex !== undefined &&
+          (this.$route.query.savegame === undefined ||
+            this.$route.query.savegame === "" ||
+            this.$route.query.savegame !==
+              websocketData.metadataData.metadata[0].savegameIndex.toString())
         ) {
-          for (let vehicle of websocketData.vehiclesData.vehicles) {
-            let found = false;
-
-            for (let oldVehicle of this.vehicleData.vehicle) {
-              if (vehicle.id === oldVehicle.id) {
-                oldVehicle.age = vehicle.age;
-                oldVehicle.farmId = vehicle.ownerFarmId;
-                oldVehicle.id = vehicle.id;
-                oldVehicle.filename = vehicle.name;
-                oldVehicle.price = vehicle.price;
-                oldVehicle.operatingTime = vehicle.operatingTime;
-
-                if (oldVehicle.component && oldVehicle.component.length > 0) {
-                  for (let vehicleComponent of oldVehicle.component) {
-                    if (vehicleComponent.index === 1) {
-                      vehicleComponent.position = `${vehicle.x} ${vehicle.y} ${vehicle.z}`;
-                    }
-                  }
-                } else {
-                  oldVehicle.component = Array<VehicleComponent>();
-                  let vehicleComponent = {} as VehicleComponent;
-
-                  vehicleComponent.index = 1;
-                  vehicleComponent.position = `${vehicle.x} ${vehicle.y} ${vehicle.z}`;
-
-                  oldVehicle.component.push(vehicleComponent);
-                }
-
-                if (vehicle.fillUnits && vehicle.fillUnits.length > 0) {
-                  oldVehicle.fillUnit = {} as VehicleFillUnitWrapper;
-                  oldVehicle.fillUnit.unit = Array<VehicleFillUnit>();
-
-                  let fillUnitIndex = 1;
-                  for (let fillUnit of vehicle.fillUnits) {
-                    let vehicleFillUnit = {} as VehicleFillUnit;
-
-                    vehicleFillUnit.fillType =
-                      nameMappingService.getFillUnitNameByMap(
-                        fillUnit.fillType,
-                        "UNKNOWN"
-                      );
-                    vehicleFillUnit.fillLevel = fillUnit.fillLevel;
-                    vehicleFillUnit.index = fillUnitIndex;
-                    oldVehicle.fillUnit.unit.push(vehicleFillUnit);
-
-                    fillUnitIndex++;
-                  }
-                }
-
-                found = true;
-              }
-            }
-
-            if (!found) {
-              let newVehicle = {} as VehicleDetails;
-
-              newVehicle.age = vehicle.age;
-              newVehicle.farmId = vehicle.ownerFarmId;
-              newVehicle.id = vehicle.id;
-              newVehicle.filename = vehicle.name;
-              newVehicle.price = vehicle.price;
-              newVehicle.operatingTime = vehicle.operatingTime;
-
-              newVehicle.component = Array<VehicleComponent>();
-              let vehicleComponent = {} as VehicleComponent;
-
-              vehicleComponent.index = 1;
-              vehicleComponent.position = `${vehicle.x} ${vehicle.y} ${vehicle.z}`;
-
-              newVehicle.component.push(vehicleComponent);
-
-              if (vehicle.fillUnits && vehicle.fillUnits.length > 0) {
-                newVehicle.fillUnit = {} as VehicleFillUnitWrapper;
-                newVehicle.fillUnit.unit = Array<VehicleFillUnit>();
-
-                let fillUnitIndex = 1;
-                for (let fillUnit of vehicle.fillUnits) {
-                  let vehicleFillUnit = {} as VehicleFillUnit;
-
-                  vehicleFillUnit.fillType =
-                    nameMappingService.getFillUnitNameByMap(
-                      fillUnit.fillType,
-                      "UNKNOWN"
-                    );
-                  vehicleFillUnit.fillLevel = fillUnit.fillLevel;
-                  vehicleFillUnit.index = fillUnitIndex;
-                  newVehicle.fillUnit.unit.push(vehicleFillUnit);
-
-                  fillUnitIndex++;
-                }
-              }
-
-              this.vehicleData.vehicle.push(newVehicle);
-            }
-          }
+          await router.push({
+            name: "Overview",
+            params: {
+              locale: this.$i18n.locale,
+            },
+            query: {
+              serverCode: this.$route.query.serverCode,
+              savegame:
+                websocketData.metadataData.metadata[0].savegameIndex.toString(),
+            },
+          });
+          router.go(0);
         }
 
         this.websocketData = undefined;

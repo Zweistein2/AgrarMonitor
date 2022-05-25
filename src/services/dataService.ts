@@ -59,10 +59,16 @@ class DataService {
           dataService.websocketData.npcsData = JSON.parse(
             data
           ) as WebsocketNPCsWrapper;
-        } else if (data.startsWith('{"time"')) {
-          dataService.websocketData.timeData = JSON.parse(
+        } else if (data.startsWith('{"environment"')) {
+          dataService.websocketData.environmentData = JSON.parse(
             data
-          ) as WebsocketTime;
+          ) as WebsocketEnvironmentWrapper;
+        } else if (data.startsWith('{"placeables"')) {
+          dataService.websocketData.placeableData = JSON.parse(
+            data
+          ) as WebsocketPlaceableWrapper;
+        } else if (data === "connection established!") {
+          console.log("Connection to websocket established!");
         } else {
           console.warn("Unknown data sent on websocket: ", data);
         }

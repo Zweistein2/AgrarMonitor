@@ -42,6 +42,7 @@
 import { defineComponent } from "vue";
 import "vue-select/dist/vue-select.css";
 import vSelect from "vue-select";
+import router from "@/router";
 
 export default defineComponent({
   name: "SavegameSwitcher",
@@ -62,7 +63,7 @@ export default defineComponent({
   watch: {
     savegame: async function (val) {
       if (this.$route.query.savegame !== this.savegame) {
-        await this.$router.push({
+        await router.push({
           params: {
             locale: this.locale,
           },
@@ -71,7 +72,7 @@ export default defineComponent({
             savegame: val,
           },
         });
-        this.$router.go(0);
+        router.go(0);
       }
     },
   },
