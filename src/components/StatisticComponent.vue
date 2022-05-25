@@ -354,7 +354,7 @@
         aria-labelledby="SellStatsHeading"
       >
         <div class="accordion-body pt-0 pb-0">
-          <table class="table">
+          <table class="table" v-if="sellingStationData !== undefined">
             <tbody>
               <tr>
                 <th scope="col">{{ $t("farmname") }}</th>
@@ -574,11 +574,47 @@ export default defineComponent({
       Map<string, Array<[string, number, number]>>
     >(),
     missionSellData: new Map<string, number>(),
+    farmsData: {} as FarmsData,
+    placeablesData: {} as PlaceableData,
+    economyData: {} as EconomyData,
   }),
   props: {
-    farmsData: Object as PropType<FarmsData>,
-    placeablesData: Object as PropType<PlaceableData>,
-    economyData: Object as PropType<EconomyData>,
+    farmsDataProp: Object as PropType<FarmsData>,
+    placeablesDataProp: Object as PropType<PlaceableData>,
+    economyDataProp: Object as PropType<EconomyData>,
+  },
+  watch: {
+    farmsDataProp: {
+      handler: function (val) {
+        if (val !== undefined) {
+          this.farmsData = val;
+        }
+      },
+      deep: true,
+      immediate: true,
+    },
+    placeablesDataProp: {
+      handler: function (val) {
+        if (val !== undefined) {
+          this.placeablesData = val;
+
+          this.updatePlaceables();
+        }
+      },
+      deep: true,
+      immediate: true,
+    },
+    economyDataProp: {
+      handler: function (val) {
+        if (val !== undefined) {
+          this.economyData = val;
+
+          this.updateEconomics();
+        }
+      },
+      deep: true,
+      immediate: true,
+    },
   },
   methods: {
     iconSrc: function (name: string): string {
@@ -601,109 +637,115 @@ export default defineComponent({
         return arr.set(key, value);
       }
     },
-  },
-  beforeUpdate(): void {
-    this.missionSellData = new Map<string, number>();
+    updatePlaceables: function () {
+      this.missionSellData = new Map<string, number>();
 
-    if (
-      this.placeablesData &&
-      this.placeablesData.placeable &&
-      this.placeablesData.placeable.length > 0 &&
-      this.farmsData &&
-      this.farmsData.farm &&
-      this.farmsData.farm.length > 0
-    ) {
-      for (let farm of this.farmsData.farm) {
-        if (farm.farmId) {
-          this.sellingStationData.set(
-            farm.farmId,
-            new Map<string, Array<[string, number, number]>>()
-          );
-        }
-      }
-
-      this.sellingStationData.set(
-        0,
-        new Map<string, Array<[string, number, number]>>()
-      );
-
-      for (let placeable of this.placeablesData.placeable) {
-        if (
-          placeable.filename &&
-          placeable.farmId !== undefined &&
-          placeable.sellingStation &&
-          placeable.sellingStation.stats &&
-          placeable.sellingStation.stats.length > 0
-        ) {
-          let fillStates = new Array<[string, number, number]>();
-
-          for (let stat of placeable.sellingStation.stats) {
-            if (
-              stat.fillType &&
-              stat.received !== undefined &&
-              stat.paid !== undefined &&
-              (stat.received > 0 || stat.paid > 0)
-            ) {
-              fillStates.push([stat.fillType, stat.received, stat.paid]);
-            }
-          }
-
-          if (fillStates.length > 0) {
-            let placeableFillStatesForFarm = this.sellingStationData.get(
-              placeable.farmId
+      if (
+        this.placeablesData &&
+        this.placeablesData.placeable &&
+        this.placeablesData.placeable.length > 0 &&
+        this.farmsData &&
+        this.farmsData.farm &&
+        this.farmsData.farm.length > 0
+      ) {
+        for (let farm of this.farmsData.farm) {
+          if (farm.farmId) {
+            this.sellingStationData.set(
+              farm.farmId,
+              new Map<string, Array<[string, number, number]>>()
             );
-
-            if (placeableFillStatesForFarm) {
-              placeableFillStatesForFarm.set(
-                nameMappingService.getPlaceableNameByMap(
-                  placeable.filename,
-                  "UNKNOWN"
-                ),
-                fillStates
-              );
-
-              this.sellingStationData.set(
-                placeable.farmId,
-                placeableFillStatesForFarm
-              );
-            }
           }
         }
-      }
-    }
-    if (
-      this.economyData !== undefined &&
-      this.economyData.fillTypes !== undefined &&
-      this.economyData.fillTypes.fillType !== undefined &&
-      Object.keys(this.economyData.fillTypes.fillType).length > 0
-    ) {
-      for (let fillType of this.economyData.fillTypes.fillType) {
-        if (
-          fillType.fillType !== undefined &&
-          fillType.totalAmount !== undefined &&
-          fillType.totalAmount > 0
-        ) {
-          let soldAmount = 0;
 
-          for (let sellingStationsForFarm of this.sellingStationData.values()) {
-            for (let sellingStation of sellingStationsForFarm.values()) {
-              for (let sellData of sellingStation) {
-                if (fillType.fillType === sellData[0]) {
-                  soldAmount += sellData[1];
-                }
+        this.sellingStationData.set(
+          0,
+          new Map<string, Array<[string, number, number]>>()
+        );
+
+        for (let placeable of this.placeablesData.placeable) {
+          if (
+            placeable.filename &&
+            placeable.farmId !== undefined &&
+            placeable.sellingStation &&
+            placeable.sellingStation.stats &&
+            placeable.sellingStation.stats.length > 0
+          ) {
+            let fillStates = new Array<[string, number, number]>();
+
+            for (let stat of placeable.sellingStation.stats) {
+              if (
+                stat.fillType &&
+                stat.received !== undefined &&
+                stat.paid !== undefined &&
+                (stat.received > 0 || stat.paid > 0)
+              ) {
+                fillStates.push([stat.fillType, stat.received, stat.paid]);
+              }
+            }
+
+            if (fillStates.length > 0) {
+              let placeableFillStatesForFarm = this.sellingStationData.get(
+                placeable.farmId
+              );
+
+              if (placeableFillStatesForFarm) {
+                placeableFillStatesForFarm.set(
+                  nameMappingService.getPlaceableNameByMap(
+                    placeable.filename,
+                    "UNKNOWN"
+                  ),
+                  fillStates
+                );
+
+                this.sellingStationData.set(
+                  placeable.farmId,
+                  placeableFillStatesForFarm
+                );
               }
             }
           }
+        }
+      }
+    },
+    updateEconomics: function () {
+      if (
+        this.economyData !== undefined &&
+        this.economyData.fillTypes !== undefined &&
+        this.economyData.fillTypes.fillType !== undefined &&
+        Object.keys(this.economyData.fillTypes.fillType).length > 0
+      ) {
+        for (let fillType of this.economyData.fillTypes.fillType) {
+          if (
+            fillType.fillType !== undefined &&
+            fillType.totalAmount !== undefined &&
+            fillType.totalAmount > 0
+          ) {
+            let soldAmount = 0;
 
-          if (fillType.totalAmount - soldAmount > 0) {
-            this.missionSellData.set(
-              fillType.fillType,
-              fillType.totalAmount - soldAmount
-            );
+            for (let sellingStationsForFarm of this.sellingStationData.values()) {
+              for (let sellingStation of sellingStationsForFarm.values()) {
+                for (let sellData of sellingStation) {
+                  if (fillType.fillType === sellData[0]) {
+                    soldAmount += sellData[1];
+                  }
+                }
+              }
+            }
+
+            if (fillType.totalAmount - soldAmount > 0) {
+              this.missionSellData.set(
+                fillType.fillType,
+                fillType.totalAmount - soldAmount
+              );
+            }
           }
         }
       }
-    }
+    },
+  },
+  mounted(): void {
+    this.updatePlaceables();
+    this.updateEconomics();
   },
 });
 </script>

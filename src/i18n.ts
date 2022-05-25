@@ -154,6 +154,76 @@ const numberFormats = {
       maximumFractionDigits: 2,
     },
   },
+  nl: {
+    currency: {
+      style: "currency",
+      currency: "EUR",
+      currencyDisplay: "symbol",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    },
+    percentage: {
+      style: "percent",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    },
+    liter: {
+      style: "unit",
+      unit: "liter",
+      unitDisplay: "short",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    },
+    hectare: {
+      style: "unit",
+      unit: "hectare",
+      unitDisplay: "short",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    },
+    kilometer: {
+      style: "unit",
+      unit: "kilometer",
+      unitDisplay: "short",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    },
+    meter: {
+      style: "unit",
+      unit: "meter",
+      unitDisplay: "short",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    },
+    kilogram: {
+      style: "unit",
+      unit: "kilogram",
+      unitDisplay: "short",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    },
+    day: {
+      style: "unit",
+      unit: "day",
+      unitDisplay: "long",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    },
+    hour: {
+      style: "unit",
+      unit: "hour",
+      unitDisplay: "short",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    },
+    minute: {
+      style: "unit",
+      unit: "minute",
+      unitDisplay: "short",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    },
+  },
 };
 const dateTimeFormats = {
   en: {
@@ -174,6 +244,23 @@ const dateTimeFormats = {
     },
   },
   de: {
+    time: {
+      hour: "numeric",
+      minute: "numeric",
+    },
+    date: {
+      month: "long",
+      day: "numeric",
+    },
+    dateShort: {
+      month: "short",
+      day: "numeric",
+    },
+    month: {
+      month: "long",
+    },
+  },
+  nl: {
     time: {
       hour: "numeric",
       minute: "numeric",
@@ -219,7 +306,7 @@ function getBrowserLocale(options = {}): string {
       : navigator.language;
 
   if (!navigatorLocale) {
-    return "en";
+    return "de";
   }
 
   return opt.countryCodeOnly

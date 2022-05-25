@@ -10,21 +10,9 @@
         <div class="card-body">
           <div class="row">
             <v-select
-              v-if="isNFMarschInstalled"
               v-model="selectedMap"
               :clearable="false"
-              :options="['Elmcreek', 'Erlengrat', 'Haut-Beyleron', 'NFMarsch']"
-              :get-option-label="(map) => `${$t(map)}`"
-            >
-              <template v-slot:option="map">
-                {{ $t(map.label) }}
-              </template>
-            </v-select>
-            <v-select
-              v-else
-              v-model="selectedMap"
-              :clearable="false"
-              :options="['Elmcreek', 'Erlengrat', 'Haut-Beyleron']"
+              :options="mapSelectables"
               :get-option-label="(map) => `${$t(map)}`"
             >
               <template v-slot:option="map">
@@ -1080,6 +1068,7 @@ import Masonry from "masonry-layout";
 import Chart, { ChartItem } from "chart.js/auto";
 import nfFruittypesMap from "@/mods/FS22_NF_Marsch_4fach_oG/utils/fruittypes";
 import nfFruityieldsMap from "@/mods/FS22_NF_Marsch_4fach_oG/utils/fruityields";
+import modService from "@/services/modService";
 
 export default defineComponent({
   name: "CalculationComponent",
@@ -1088,8 +1077,8 @@ export default defineComponent({
     "v-select": vSelect,
   },
   props: {
-    economyData: Object as PropType<EconomyData>,
-    metaData: Object as PropType<MetaData>,
+    economyDataProp: Object as PropType<EconomyData>,
+    metaDataProp: Object as PropType<MetaData>,
   },
   data: () => ({
     selectedFruitType: "WHEAT" as string,
@@ -1116,6 +1105,9 @@ export default defineComponent({
       "difficulty_3",
     ] as Array<string>,
     masonry: {} as Masonry,
+    masonryScript: {} as HTMLScriptElement,
+    economyData: {} as EconomyData,
+    metaData: {} as MetaData,
   }),
   watch: {
     selectedMap: function () {
@@ -1127,6 +1119,24 @@ export default defineComponent({
     },
     selectedDifficulty: function () {
       this.updateMasonry();
+    },
+    economyDataProp: {
+      handler: function (val) {
+        if (val !== undefined) {
+          this.economyData = val;
+        }
+      },
+      deep: true,
+      immediate: true,
+    },
+    metaDataProp: {
+      handler: function (val) {
+        if (val !== undefined) {
+          this.metaData = val;
+        }
+      },
+      deep: true,
+      immediate: true,
     },
   },
   methods: {
@@ -1144,7 +1154,7 @@ export default defineComponent({
       let fruittype = this.fruittypes.get(this.selectedFruitType);
       if (fruittype) {
         let price = fruittype[1];
-        let priceFaktorPerMonth = fruittype[2];
+        let priceFaktorPerMonth = fruittype[3];
 
         return (
           price * 1000 * this.difficultyFactor * priceFaktorPerMonth[month]
@@ -1261,17 +1271,25 @@ export default defineComponent({
     },
   },
   mounted(): void {
-    let masonryScript = document.createElement("script");
-    masonryScript.setAttribute(
-      "src",
-      "https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"
-    );
-    document.head.appendChild(masonryScript);
+    if (this.masonryScript.id === undefined) {
+      this.masonryScript = document.createElement("script");
+      this.masonryScript.setAttribute(
+        "src",
+        "https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"
+      );
+      this.masonryScript.setAttribute("id", "masonryScript");
+      document.head.appendChild(this.masonryScript);
+    }
 
     let row = document.querySelector("#masonry") as Element;
     this.masonry = new Masonry(row, {
       percentPosition: true,
     });
+  },
+  unmounted(): void {
+    if (this.masonryScript.id !== undefined) {
+      document.head.removeChild(this.masonryScript);
+    }
   },
   updated(): void {
     this.updateMasonry();
@@ -1349,18 +1367,17 @@ export default defineComponent({
     }
   },
   computed: {
-    isNFMarschInstalled: function () {
-      if (this.metaData !== undefined && this.metaData.mod !== undefined) {
-        return (
-          this.metaData.mod.filter(
-            (value) =>
-              value.modName === "FS22_NF_Marsch_4fach_oG" ||
-              value.modName === "FS22_NF_Marsch_4fach"
-          ).length === 1
-        );
-      } else {
-        return false;
+    mapSelectables() {
+      let maps = ["Elmcreek", "Erlengrat", "Haut-Beyleron"];
+
+      if (modService.isNFMarschInstalled(this.metaData)) {
+        maps.push("NFMarsch");
       }
+      if (modService.isLKHROInstalled(this.metaData)) {
+        maps.push("LkHRO");
+      }
+
+      return maps;
     },
     fruittypeNames() {
       let fruittypeNames = new Array<string>();
@@ -1396,14 +1413,14 @@ export default defineComponent({
       return fruittypeNames;
     },
     fruityields() {
-      if (this.isNFMarschInstalled && this.selectedMap === "NFMarsch") {
+      if (modService.isNFMarschInstalled && this.selectedMap === "NFMarsch") {
         return new Map([...fruityieldsMap, ...nfFruityieldsMap]);
       }
 
       return fruityieldsMap;
     },
     fruittypes() {
-      if (this.isNFMarschInstalled && this.selectedMap === "NFMarsch") {
+      if (modService.isNFMarschInstalled && this.selectedMap === "NFMarsch") {
         return new Map([...fruittypesMap, ...nfFruittypesMap]);
       }
 

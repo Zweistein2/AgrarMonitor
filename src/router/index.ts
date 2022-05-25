@@ -7,6 +7,7 @@ import MissionView from "@/views/MissionView.vue";
 import StatisticView from "@/views/StatisticView.vue";
 import BalanceView from "@/views/BalanceView.vue";
 import CalculationView from "@/views/CalculationView.vue";
+import FarmsView from "@/views/FarmsView.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -67,6 +68,11 @@ const routes: Array<RouteRecordRaw> = [
         path: "calculation",
         name: "Calculation",
         component: CalculationView,
+      },
+      {
+        path: "farms",
+        name: "Farms",
+        component: FarmsView,
       },
     ],
   },

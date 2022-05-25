@@ -2,7 +2,7 @@
   <div
     class="accordion accordion-flush"
     id="storageAccordion"
-    v-if="farmsData !== undefined"
+    v-if="farmsData !== undefined && placeablesData !== undefined"
   >
     <template v-for="farm in farmsData.farm" :key="farm.farmId">
       <div
@@ -160,15 +160,37 @@ import i18n from "@/i18n";
 export default defineComponent({
   name: "StorageComponent",
   props: {
-    farmsData: Object as PropType<FarmsData>,
-    placeablesData: Object as PropType<PlaceableData>,
+    farmsDataProp: Object as PropType<FarmsData>,
+    placeablesDataProp: Object as PropType<PlaceableData>,
   },
   data: () => ({
     storageFillStatesPerFarm: new Map<
       number,
       Array<[string, Map<string, [number, string]>]>
     >(),
+    farmsData: {} as FarmsData,
+    placeablesData: {} as PlaceableData,
   }),
+  watch: {
+    farmsDataProp: {
+      handler: function (val) {
+        if (val !== undefined) {
+          this.farmsData = val;
+        }
+      },
+      deep: true,
+      immediate: true,
+    },
+    placeablesDataProp: {
+      handler: function (val) {
+        if (val !== undefined) {
+          this.placeablesData = val;
+        }
+      },
+      deep: true,
+      immediate: true,
+    },
+  },
   methods: {
     iconSrc: function (name: string): string {
       try {
@@ -184,7 +206,7 @@ export default defineComponent({
       Array<[string, Map<string, [number, string]>]>
     >();
 
-    if (this.placeablesData) {
+    if (this.placeablesData && this.placeablesData.placeable !== undefined) {
       for (let placeable of this.placeablesData.placeable) {
         if (
           placeable.silo !== undefined &&
